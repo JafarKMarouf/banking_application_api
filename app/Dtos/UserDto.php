@@ -203,6 +203,7 @@ class UserDto implements DtoInterface
         $userDto->setName($model->name);
         $userDto->setEmail($model->email);
         $userDto->setPhoneNumber($model->phone_number);
+        $userDto->setPassword($model->password);
         $userDto->setCreatedAt($model->created_at);
         $userDto->setUpdatedAt($model->updated_at);
         return $userDto;
