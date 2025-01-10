@@ -10,7 +10,7 @@ class UserService
 {
     public function createUser(UserDto $userDto)
     {
-        return User::create([
+        return User::query()->create([
             'name' => $userDto->getName(),
             'email' => $userDto->getEmail(),
             'phone_number' => $userDto->getPhoneNumber(),

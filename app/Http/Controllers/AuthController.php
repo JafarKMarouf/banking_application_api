@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Dtos\UserDto;
 use App\Http\Requests\RegisterUserRequest;
 use App\Services\UserService;
+use App\Traits\ApiResponseTrait;
+use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
 {
@@ -13,17 +15,13 @@ class AuthController extends Controller
     public function __construct(public readonly UserService $userService) {}
 
 
-    public function register(RegisterUserRequest $request)
+    public function register(RegisterUserRequest $request): JsonResponse
     {
-
-
         $userDto = UserDto::fromApiFormRequest($request);
         $user = $this->userService->createUser($userDto);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Registeration Successfull',
-            'user' => $user,
-        ]);
+        return $this->sendSuccess(
+            ['user' => $user],
+            'Registeration Successfully'
+        );
     }
 }
