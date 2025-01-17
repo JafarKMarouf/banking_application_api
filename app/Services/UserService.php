@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Dtos\UserDto;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use App\Notifications\SendEmailNotification;
 
 class UserService
 {
@@ -17,6 +17,8 @@ class UserService
                 'phone_number' => $userDto->getPhoneNumber(),
                 'password' => $userDto->getPassword(),
             ]);
+
+        $user->notify(new SendEmailNotification('12343'));
         $message = 'User Registeration Successfull!';
         return ['user' => $user, 'message' => $message];
     }

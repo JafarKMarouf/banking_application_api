@@ -19,7 +19,8 @@ class AuthController extends Controller
     public function register(RegisterUserRequest $request): JsonResponse
     {
         try {
-            $userDto = UserDto::fromApiFormRequest($request->validated());
+            $request->validated();
+            $userDto = UserDto::fromApiFormRequest($request);
             $data = $this->userService->createUser($userDto);
             return Response::success($data['user'], $data['message']);
         } catch (\Throwable $th) {
