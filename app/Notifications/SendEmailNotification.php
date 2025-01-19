@@ -36,7 +36,7 @@ class SendEmailNotification extends Notification
     {
         return (new MailMessage)
             ->subject('Email Verification')
-            ->markdown('mails.register', [
+            ->markdown('mail.register', [
                 'otp' => $this->otp,
                 'name' => $notifiable->name,
             ]);

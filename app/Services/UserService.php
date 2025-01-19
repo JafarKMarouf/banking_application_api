@@ -6,11 +6,12 @@ use App\Dtos\UserDto;
 use App\Models\User;
 use App\Notifications\SendEmailNotification;
 use App\Traits\OtpTrait;
+use Illuminate\Http\Request;
 
 class UserService
 {
     use OtpTrait;
-    public function createUser(UserDto $userDto)
+    public function createUser(Request $request, UserDto $userDto): array
     {
         $user =
             User::query()->create([
@@ -19,9 +20,9 @@ class UserService
                 'phone_number' => $userDto->getPhoneNumber(),
                 'password' => $userDto->getPassword(),
             ]);
-        $otp = $this->generateOtp($user->email);
-
+        $otp = $this->generateOtp($request, $user->email);
         $user->notify(new SendEmailNotification($otp));
+
         $message = 'User Registeration Successfull!';
         return ['user' => $user, 'message' => $message];
     }
