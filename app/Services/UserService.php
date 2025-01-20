@@ -20,10 +20,15 @@ class UserService
                 'phone_number' => $userDto->getPhoneNumber(),
                 'password' => $userDto->getPassword(),
             ]);
+        $token = $user->createToken('token')->plainTextToken;
+
         $otp = $this->generateOtp($request, $user->email);
         $user->notify(new SendEmailNotification($otp));
 
+        $data['user'] = $user;
+        $data['token'] = $token;
+
         $message = 'User Registeration Successfull!';
-        return ['user' => $user, 'message' => $message];
+        return ['data' => $data, 'message' => $message];
     }
 }

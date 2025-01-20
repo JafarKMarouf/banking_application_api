@@ -21,8 +21,13 @@ class AuthController extends Controller
         try {
             $request->validated();
             $userDto = UserDto::fromApiFormRequest($request);
-            $data = $this->userService->createUser($request, $userDto);
-            return Response::success($data['user'], $data['message']);
+            $response = $this->userService->createUser($request, $userDto);
+
+            return Response::success(
+                $response['data'],
+                $response['message'],
+                201
+            );
         } catch (\Throwable $th) {
             return Response::error($th->getMessage());
         }
