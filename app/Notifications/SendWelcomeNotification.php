@@ -3,20 +3,19 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class SendEmailNotification extends Notification
+class SendWelcomeNotification extends Notification
 {
     use Queueable;
-    private $otp;
+    private $username;
     /**
      * Create a new notification instance.
      */
-    public function __construct($otp)
+    public function __construct($username)
     {
-        $this->otp = $otp;
+        $this->username = $username;
     }
 
     /**
@@ -35,10 +34,9 @@ class SendEmailNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Email Verification')
-            ->markdown('mail.register', [
-                'otp' => $this->otp,
-                'name' => $notifiable->name,
+            ->subject('Welcome')
+            ->markdown('mail.hello', [
+                'username' => $notifiable->name,
             ]);
     }
 

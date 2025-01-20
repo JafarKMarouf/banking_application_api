@@ -3,10 +3,13 @@
 namespace App\Services;
 
 use App\Dtos\UserDto;
+use App\Jobs\SendEmailJob;
+use App\Jobs\SendEmailVerificationJob;
+use App\Jobs\SendWelcomeJob;
 use App\Models\User;
-use App\Notifications\SendEmailNotification;
 use App\Traits\OtpTrait;
 use Illuminate\Http\Request;
+use \App\Notifications\SendEmailVerificationNotification;
 
 class UserService
 {
@@ -23,12 +26,15 @@ class UserService
         $token = $user->createToken('token')->plainTextToken;
 
         $otp = $this->generateOtp($request, $user->email);
-        $user->notify(new SendEmailNotification($otp));
+        $user->notify(new SendEmailVerificationNotification($otp));
+
+        dispatch(new SendWelcomeJob($user));
 
         $data['user'] = $user;
         $data['token'] = $token;
 
         $message = 'User Registeration Successfull!';
+
         return ['data' => $data, 'message' => $message];
     }
 }
