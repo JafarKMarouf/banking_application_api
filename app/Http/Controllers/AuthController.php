@@ -6,6 +6,7 @@ use App\Dtos\UserDto;
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\RegisterUserRequest;
 use App\Http\Response\Response;
+use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 
@@ -40,7 +41,7 @@ class AuthController extends Controller
         }
     }
 
-    public function login(LoginUserRequest $request)
+    public function login(LoginUserRequest $request): JsonResponse
     {
         try {
             $request->validated();
@@ -55,5 +56,12 @@ class AuthController extends Controller
                 $th->getCode(),
             );
         }
+    }
+
+    public function logout(): JsonResponse
+    {
+        $userId = auth()->user()->id;
+        User::find($userId)->tokens()->delete();
+        return Response::success([], 'User Logged out Successfully');
     }
 }
