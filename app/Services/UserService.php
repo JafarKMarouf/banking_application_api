@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Dtos\UserDto;
+use App\Jobs\SendEmailVerificationJob;
 use App\Jobs\SendWelcomeJob;
 use App\Models\User;
 use App\Traits\OtpTrait;
@@ -26,8 +27,7 @@ class UserService
         $token = $user->createToken('token')->plainTextToken;
         $otp = $this->generateOtp($user->email, $ipAddress);
 
-        $user->notify(new SendEmailVerificationNotification($otp));
-        dispatch(new SendWelcomeJob($user));
+        dispatch(new SendEmailVerificationJob($user, $otp));
 
         $data['user'] = $user;
         $data['token'] = $token;

@@ -3,14 +3,15 @@
 namespace App\Traits;
 
 use Ichtrojan\Otp\Otp;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 trait OtpTrait
 {
 
     public function generateOtp(
-        $request,
         $email,
+        $ipAddress,
         $type = 'alpha_numeric',
         $length = 6,
         $validity = 2,
@@ -22,9 +23,8 @@ trait OtpTrait
             $length,
             $validity
         );
-
         $cache = Cache::store('database');
-        $cache->put($request->ip(), [$email, $otp->token]);
+        $cache->put($ipAddress, [$email, $otp->token]);
         return $otp->token;
     }
 }
