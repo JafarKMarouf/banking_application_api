@@ -3,7 +3,6 @@
 namespace App\Traits;
 
 use Ichtrojan\Otp\Otp;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 trait OtpTrait

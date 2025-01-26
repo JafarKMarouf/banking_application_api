@@ -9,6 +9,7 @@ use App\Http\Response\Response;
 use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 
 class AuthController extends Controller
 {
@@ -25,37 +26,30 @@ class AuthController extends Controller
      */
     public function register(RegisterUserRequest $request): JsonResponse
     {
-        try {
-            $request->validated();
-            $userDto = UserDto::fromApiFormRequest($request);
-            $ipAddress = $request->ip();
-            $response = $this->userService->createUser($userDto, $ipAddress);
+        $request->validated();
+        $userDto = UserDto::fromApiFormRequest($request);
+        $ipAddress = $request->ip();
+        $response = $this->userService->createUser($userDto, $ipAddress);
 
-            return Response::success(
-                $response['data'],
-                $response['message'],
-                201
-            );
-        } catch (\Throwable $th) {
-            return Response::error($th->getMessage());
-        }
+        return Response::success(
+            $response['data'],
+            $response['message'],
+            201
+        );
     }
 
     public function login(LoginUserRequest $request): JsonResponse
     {
-        try {
-            $request->validated();
-            $response = $this->userService->loginUser($request);
-            return Response::success(
+        $request->validated();
+        $response = $this->userService->loginUser($request);
+        return $response['code'] != 200 ?
+            Response::error(
+                $response['message'],
+                $response['code']
+            ) : Response::success(
                 $response['data'],
                 $response['message']
             );
-        } catch (\Throwable $th) {
-            return Response::error(
-                $th->getMessage(),
-                $th->getCode(),
-            );
-        }
     }
 
     public function logout(): JsonResponse
