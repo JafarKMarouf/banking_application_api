@@ -9,7 +9,7 @@ use App\Http\Response\Response;
 use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
@@ -57,5 +57,14 @@ class AuthController extends Controller
         $userId = auth()->user()->id;
         User::find($userId)->tokens()->delete();
         return Response::success([], 'User Logged out Successfully');
+    }
+
+    public function user(Request $request): JsonResponse
+    {
+        $user = auth()->user();
+        return Response::success(
+            $user,
+            'Authenticated User retrieved'
+        );
     }
 }

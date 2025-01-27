@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response as HttpFoundationResponse;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -62,8 +63,15 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $e): JsonResponse|Response
     {
+
+        Log::error($e->getMessage());
+
+        if ($e instanceof NotFoundHttpException) {
+            $status_code = HttpFoundationResponse::HTTP_NOT_FOUND;
+            return Response::error($e->getMessage(), $status_code);
+        }
+
         if ($request->expectsJson()) {
-            Log::error($e);
             if ($e instanceof ValidationException) {
                 $status_code =
                     HttpFoundationResponse::HTTP_UNPROCESSABLE_ENTITY;
@@ -72,7 +80,6 @@ class Handler extends ExceptionHandler
                     $status_code
                 );
             }
-
             if ($e instanceof ModelNotFoundException) {
                 $status_code =
                     HttpFoundationResponse::HTTP_NOT_FOUND;
@@ -81,7 +88,6 @@ class Handler extends ExceptionHandler
                     $status_code,
                 );
             }
-
             if ($e instanceof UniqueConstraintViolationException) {
                 $status_code =
                     HttpFoundationResponse::HTTP_INTERNAL_SERVER_ERROR;
@@ -101,11 +107,10 @@ class Handler extends ExceptionHandler
             if ($e instanceof AuthenticationException) {
                 $status_code =  HttpFoundationResponse::HTTP_UNAUTHORIZED;
                 return Response::error(
-                    $e->getMessage(),
+                    'Unauthenticated or Token Expired, please try to login again',
                     $status_code
                 );
             }
-
             if ($e instanceof \Exception) {
                 $status_code =
                     HttpFoundationResponse::HTTP_INTERNAL_SERVER_ERROR;
