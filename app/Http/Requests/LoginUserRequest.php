@@ -40,9 +40,9 @@ class LoginUserRequest extends FormRequest
         ];
     }
 
-    protected function failedValidation(Validator $validator)
-    {
-        $response = Response::validation($validator->errors());
-        throw new ValidationException($validator, $response);
-    }
+    // protected function failedValidation(Validator $validator)
+    // {
+    //     $response = Response::validation($validator->errors());
+    //     throw new ValidationException($validator, $response);
+    // }
 }

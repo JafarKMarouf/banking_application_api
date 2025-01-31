@@ -3,14 +3,25 @@
 namespace App\Services;
 
 use App\Dtos\UserDto;
+use App\Exceptions\InvalidPinLength;
+use App\Exceptions\NotSetupPin;
+use App\Exceptions\PinHasAlreadyBeenSet;
+use App\Interfaces\UserServiceInterface;
 use App\Jobs\SendEmailVerificationJob;
 use App\Models\User;
 use App\Traits\OtpTrait;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
-class UserService
+class UserService implements UserServiceInterface
 {
     use OtpTrait;
+    /**
+     * @param \App\Dtos\UserDto $userDto
+     * @param mixed $ipAddress
+     * @return array{data: array<string|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model>, message: string}
+     */
     public function createUser(UserDto $userDto, $ipAddress): array
     {
         $user =
@@ -34,6 +45,10 @@ class UserService
         return ['data' => $data, 'message' => $message];
     }
 
+    /**
+     * @param mixed $request
+     * @return array{code: int, data: array, message: string}
+     */
     public function loginUser($request): array
     {
         $field = filter_var(
@@ -57,5 +72,51 @@ class UserService
         $code = 200;
 
         return ['data' => $data, 'message' => $message, 'code' => $code];
+    }
+    /**
+     * @inheritDoc
+     */
+    public function getUserById(int $userId): User
+    {
+        $user = User::query()->where('id', $userId)->first();
+        return $user;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function hasSetPin(User $user): bool
+    {
+        return $user->pin != null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setupPin(User $user, string $pin): void
+    {
+        if ($this->hasSetPin($user)) {
+            throw new PinHasAlreadyBeenSet();
+        }
+
+        $user->pin = Hash::make($pin);
+        $user->save();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function validatePin(int $userId, string $pin): bool
+    {
+
+        $user = $this->getUserById($userId);
+        if (!$user) {
+            throw new ModelNotFoundException();
+        }
+        if (!$this->hasSetPin($user)) {
+            throw new NotSetupPin();
+        }
+
+        return Hash::check($pin, $user->pin);
     }
 }

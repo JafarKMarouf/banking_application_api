@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PinController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,14 +17,24 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::group(['prefix' => 'auth'], function () {
-    Route::controller(AuthController::class)->group(function () {
-        Route::post('register', 'register');
-        Route::post('login', 'login');
+    Route::controller(AuthController::class)
+        ->group(function () {
+            Route::post('register', 'register');
+            Route::post('login', 'login');
 
-        Route::middleware('auth:sanctum')
+            Route::middleware('auth:sanctum')
+                ->group(function () {
+                    Route::get('logout', 'logout');
+                    Route::get('user', 'user');
+                });
+        });
+});
+
+Route::middleware('auth:sanctum')
+    ->prefix('onboarding/')
+    ->group(function () {
+        Route::controller(PinController::class)
             ->group(function () {
-                Route::get('logout', 'logout');
-                Route::get('user', 'user');
+                Route::post('setup/pin', 'setupPin');
             });
     });
-});

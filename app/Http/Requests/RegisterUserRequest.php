@@ -58,9 +58,4 @@ class RegisterUserRequest extends FormRequest
             'password.max' => 'The password may not be greater than 200 characters.',
         ];
     }
-    protected function failedValidation(Validator $validator): never
-    {
-        $response = Response::validation($validator->errors());
-        throw new ValidationException($validator, $response);
-    }
 }

@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use App\Http\Response\Response;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
@@ -12,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response as HttpFoundationResponse;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
@@ -63,15 +65,9 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $e): JsonResponse|Response
     {
-
-        Log::error($e->getMessage());
-
-        if ($e instanceof NotFoundHttpException) {
-            $status_code = HttpFoundationResponse::HTTP_NOT_FOUND;
-            return Response::error($e->getMessage(), $status_code);
-        }
-
         if ($request->expectsJson()) {
+            Log::error($e);
+
             if ($e instanceof ValidationException) {
                 $status_code =
                     HttpFoundationResponse::HTTP_UNPROCESSABLE_ENTITY;
@@ -111,12 +107,34 @@ class Handler extends ExceptionHandler
                     $status_code
                 );
             }
+            if ($e instanceof PinHasAlreadyBeenSet) {
+                $status_code = HttpFoundationResponse::HTTP_BAD_REQUEST;
+                return Response::error('Pin has already been set', $status_code);
+            }
+            if ($e instanceof NotSetupPin) {
+                $status_code = HttpFoundationResponse::HTTP_BAD_REQUEST;
+                return Response::error('Please setup pin', $status_code);
+            }
+            if ($e instanceof NotFoundHttpException) {
+                $status_code = HttpFoundationResponse::HTTP_NOT_FOUND;
+                return Response::error($e->getMessage(), $status_code);
+            }
+            if ($e instanceof MethodNotAllowedHttpException) {
+                $status_code = HttpFoundationResponse::HTTP_METHOD_NOT_ALLOWED;
+                return Response::error($e->getMessage(), $status_code);
+            }
+
+            if ($e instanceof AuthorizationException) {
+                $status_code = HttpFoundationResponse::HTTP_UNAUTHORIZED;
+                return Response::error($e->getMessage(), $status_code);
+            }
+
             if ($e instanceof \Exception) {
                 $status_code =
                     HttpFoundationResponse::HTTP_INTERNAL_SERVER_ERROR;
 
                 return Response::error(
-                    'We could not handle your request, please try again later',
+                    $e->getMessage(),
                     $status_code,
                 );
             }
@@ -125,11 +143,12 @@ class Handler extends ExceptionHandler
                     HttpFoundationResponse::HTTP_INTERNAL_SERVER_ERROR;
 
                 return Response::error(
-                    'We could not handle your request, please try again later',
+                    $e->getMessage(),
                     $status_code,
                 );
             }
         }
+
         return parent::render($request, $e);
     }
 }
