@@ -108,7 +108,6 @@ class UserService implements UserServiceInterface
      */
     public function validatePin(int $userId, string $pin): bool
     {
-
         $user = $this->getUserById($userId);
         if (!$user) {
             throw new ModelNotFoundException();
@@ -116,7 +115,6 @@ class UserService implements UserServiceInterface
         if (!$this->hasSetPin($user)) {
             throw new NotSetupPin();
         }
-
         return Hash::check($pin, $user->pin);
     }
 }

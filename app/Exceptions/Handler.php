@@ -65,8 +65,20 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $e): JsonResponse|Response
     {
+        Log::error($e);
+
+        if ($e instanceof MethodNotAllowedHttpException) {
+            $status_code = HttpFoundationResponse::HTTP_METHOD_NOT_ALLOWED;
+            return Response::error($e->getMessage(), $status_code);
+        }
+
+
+        if ($e instanceof NotFoundHttpException) {
+            $status_code = HttpFoundationResponse::HTTP_NOT_FOUND;
+            return Response::error($e->getMessage(), $status_code);
+        }
+
         if ($request->expectsJson()) {
-            Log::error($e);
 
             if ($e instanceof ValidationException) {
                 $status_code =
@@ -113,22 +125,13 @@ class Handler extends ExceptionHandler
             }
             if ($e instanceof NotSetupPin) {
                 $status_code = HttpFoundationResponse::HTTP_BAD_REQUEST;
-                return Response::error('Please setup pin', $status_code);
-            }
-            if ($e instanceof NotFoundHttpException) {
-                $status_code = HttpFoundationResponse::HTTP_NOT_FOUND;
-                return Response::error($e->getMessage(), $status_code);
-            }
-            if ($e instanceof MethodNotAllowedHttpException) {
-                $status_code = HttpFoundationResponse::HTTP_METHOD_NOT_ALLOWED;
-                return Response::error($e->getMessage(), $status_code);
+                return Response::error('You have not set PIN yet!, Please setup your PIN', $status_code);
             }
 
             if ($e instanceof AuthorizationException) {
                 $status_code = HttpFoundationResponse::HTTP_UNAUTHORIZED;
                 return Response::error($e->getMessage(), $status_code);
             }
-
             if ($e instanceof \Exception) {
                 $status_code =
                     HttpFoundationResponse::HTTP_INTERNAL_SERVER_ERROR;

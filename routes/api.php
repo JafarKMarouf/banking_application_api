@@ -36,5 +36,7 @@ Route::middleware('auth:sanctum')
         Route::controller(PinController::class)
             ->group(function () {
                 Route::post('setup/pin', 'setupPin');
+                Route::post('validate/pin', 'validatePin');
+                Route::post('has_pin/pin', 'hasSetPIN');
             });
     });
