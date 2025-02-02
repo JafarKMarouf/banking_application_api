@@ -78,7 +78,9 @@ class UserService implements UserServiceInterface
      */
     public function getUserById(int $userId): User
     {
-        $user = User::query()->where('id', $userId)->first();
+        $user = User::query()
+            ->where('id', $userId)
+            ->first();
         return $user;
     }
 

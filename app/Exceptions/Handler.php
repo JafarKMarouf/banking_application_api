@@ -127,6 +127,13 @@ class Handler extends ExceptionHandler
                 $status_code = HttpFoundationResponse::HTTP_BAD_REQUEST;
                 return Response::error('You have not set PIN yet!, Please setup your PIN', $status_code);
             }
+            if ($e instanceof AccountNumberExistsException) {
+                $status_code = HttpFoundationResponse::HTTP_BAD_REQUEST;
+                return Response::error(
+                    'Account number has already been generated!',
+                    $status_code
+                );
+            }
 
             if ($e instanceof AuthorizationException) {
                 $status_code = HttpFoundationResponse::HTTP_UNAUTHORIZED;

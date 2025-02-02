@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PinController;
 use Illuminate\Http\Request;
@@ -38,5 +39,12 @@ Route::middleware('auth:sanctum')
                 Route::post('setup/pin', 'setupPin');
                 Route::post('validate/pin', 'validatePin');
                 Route::post('has_pin/pin', 'hasSetPIN');
+            });
+
+        Route::controller(AccountController::class)
+            ->prefix('account')
+            ->group(function () {
+                Route::post('/create_account_number', 'createAccountNumber');
+                Route::get('/{identifier}', 'getAccount');
             });
     });
