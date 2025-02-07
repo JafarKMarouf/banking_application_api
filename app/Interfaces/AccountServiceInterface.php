@@ -2,6 +2,7 @@
 
 namespace App\Interfaces;
 
+use App\Dtos\DepositDto;
 use App\Dtos\UserDto;
 use App\Models\Account;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,4 +20,8 @@ interface AccountServiceInterface
     public function getAccount(int|string $accountNumberOrUserId): Account;
 
     public function hasAccountNumber(UserDto $userDto): bool;
+
+    public function deposit(DepositDto $depositDto): void;
+
+    public function accountExist(Builder $accountQuery): void;
 }

@@ -124,8 +124,11 @@ class Handler extends ExceptionHandler
                 return Response::error('Pin has already been set', $status_code);
             }
             if ($e instanceof NotSetupPin) {
-                $status_code = HttpFoundationResponse::HTTP_BAD_REQUEST;
-                return Response::error('You have not set PIN yet!, Please setup your PIN', $status_code);
+                $status_code = HttpFoundationResponse::HTTP_UNAUTHORIZED;
+                return Response::error(
+                    'You have not set PIN yet!, Please setup your PIN',
+                    $status_code
+                );
             }
             if ($e instanceof AccountNumberExistsException) {
                 $status_code = HttpFoundationResponse::HTTP_BAD_REQUEST;
@@ -134,7 +137,13 @@ class Handler extends ExceptionHandler
                     $status_code
                 );
             }
-
+            if ($e instanceof InvaildAccountNumberException) {
+                $status_code = HttpFoundationResponse::HTTP_BAD_REQUEST;
+                return Response::error(
+                    'Invaild Account Number',
+                    $status_code
+                );
+            }
             if ($e instanceof AuthorizationException) {
                 $status_code = HttpFoundationResponse::HTTP_UNAUTHORIZED;
                 return Response::error($e->getMessage(), $status_code);

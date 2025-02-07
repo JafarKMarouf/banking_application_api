@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DepositAccountController;
 use App\Http\Controllers\PinController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -31,20 +32,25 @@ Route::group(['prefix' => 'auth'], function () {
         });
 });
 
-Route::middleware('auth:sanctum')
-    ->prefix('onboarding/')
-    ->group(function () {
-        Route::controller(PinController::class)
-            ->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
+    Route::prefix('onboarding')
+        ->group(function () {
+            Route::controller(PinController::class)->group(function () {
                 Route::post('setup/pin', 'setupPin');
-                Route::post('validate/pin', 'validatePin');
-                Route::post('has_pin/pin', 'hasSetPIN');
+                Route::middleware('has.set.pin')
+                    ->post('validate/pin', 'validatePin');
             });
+            Route::middleware('has.set.pin')
+                ->post('generate/account_number', [
+                    AccountController::class,
+                    'createAccountNumber'
+                ]);
+        });
 
-        Route::controller(AccountController::class)
-            ->prefix('account')
-            ->group(function () {
-                Route::post('/create_account_number', 'createAccountNumber');
-                Route::get('/{identifier}', 'getAccount');
-            });
-    });
+    Route::middleware('has.set.pin')
+        ->prefix('account')
+        ->controller(DepositAccountController::class)
+        ->group(function () {
+            Route::post('deposit', 'store');
+        });
+});
