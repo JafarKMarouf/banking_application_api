@@ -16,7 +16,6 @@ class AccountDto implements DtoInterface
     private int $userId;
     private string $accountNumber;
     private float $balance;
-
     private Carbon $created_at;
     private Carbon $updated_at;
     /**
@@ -52,7 +51,7 @@ class AccountDto implements DtoInterface
     /**
      * Get the value of id
      */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
@@ -62,7 +61,7 @@ class AccountDto implements DtoInterface
      *
      * @return  self
      */
-    public function setId($id)
+    public function setId($id): static
     {
         $this->id = $id;
 
@@ -72,7 +71,7 @@ class AccountDto implements DtoInterface
     /**
      * Get the value of userId
      */
-    public function getUserId()
+    public function getUserId(): int
     {
         return $this->userId;
     }

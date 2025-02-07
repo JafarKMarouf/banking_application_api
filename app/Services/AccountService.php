@@ -6,10 +6,17 @@ use App\Dtos\AccountDto;
 use App\Dtos\DepositDto;
 use App\Dtos\TransactionDto;
 use App\Dtos\UserDto;
+use App\Dtos\WithdrawDto;
 use App\Events\DepositEvent;
+use App\Events\TransactionEvent;
 use App\Exceptions\AccountNumberExistsException;
 use App\Exceptions\AmountToLowDepositException;
+use App\Exceptions\AmountToLowWithdrawException;
+use App\Exceptions\DepositAmountToLowException;
 use App\Exceptions\InvaildAccountNumberException;
+use App\Exceptions\InvaildPinException;
+use App\Exceptions\NotEnoughBalanceException;
+use App\Exceptions\WithdrawAmountToLowException;
 use App\Interfaces\AccountServiceInterface;
 use App\Models\Account;
 use Exception;
@@ -99,14 +106,24 @@ class AccountService implements AccountServiceInterface
             ->exists();
     }
     /**
+     * @param \Illuminate\Database\Eloquent\Builder $accountQuery
+     * @throws \App\Exceptions\InvaildAccountNumberException
+     * @return void
+     */
+    public function accountExist(Builder $accountQuery): void
+    {
+        if ($accountQuery->exists() == false) {
+            throw new InvaildAccountNumberException();
+        }
+    }
+    /**
      * @inheritDoc
      */
     public function deposit(DepositDto $depositDto): void
     {
-        // dd($depositDto);
         $minimun_amount  = 500;
         if ($depositDto->getAmount() < $minimun_amount) {
-            throw new AmountToLowDepositException($minimun_amount);
+            throw new DepositAmountToLowException($minimun_amount);
         }
 
         try {
@@ -124,7 +141,48 @@ class AccountService implements AccountServiceInterface
                 $depositDto->getAmount(),
                 $depositDto->getDescription(),
             );
-            event(new DepositEvent(
+            event(new TransactionEvent(
+                $transactionDto,
+                $accountDto,
+                $lockedAccount
+            ));
+            DB::commit();
+        } catch (Exception $exception) {
+            DB::rollBack();
+            throw $exception;
+        }
+    }
+    /**
+     * @inheritDoc
+     */
+    public function withdraw(WithdrawDto $withdrawDto): void
+    {
+        $minimun_amount  = 500;
+        if ($withdrawDto->getAmount() < $minimun_amount) {
+            throw new WithdrawAmountToLowException($minimun_amount);
+        }
+        try {
+            DB::beginTransaction();
+            $accountQuery = $this->modelQuery()->where(
+                'account_number',
+                $withdrawDto->getAccountNumber()
+            );
+            $this->accountExist($accountQuery);
+            $lockedAccount = $accountQuery->lockForUpdate()->first();
+
+            $accountDto = new AccountDto();
+            $accountDto->fromModel($lockedAccount);
+            if (!$this->userService->validatePin($accountDto->getUserId(), $withdrawDto->getPin())) {
+                throw new InvaildPinException();
+            }
+            $this->canWithdraw($accountDto, $withdrawDto);
+            $transactionDto = TransactionDto::forWithdraw(
+                $accountDto,
+                $this->transactionService->generateReference(),
+                $withdrawDto->getAmount(),
+                $withdrawDto->getDescription(),
+            );
+            event(new TransactionEvent(
                 $transactionDto,
                 $accountDto,
                 $lockedAccount
@@ -136,15 +194,12 @@ class AccountService implements AccountServiceInterface
         }
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $accountQuery
-     * @throws \App\Exceptions\InvaildAccountNumberException
-     * @return void
-     */
-    public function accountExist(Builder $accountQuery): void
+    public function canWithdraw(AccountDto $accountDto, WithdrawDto $withdrawDto): bool
     {
-        if ($accountQuery->exists() == false) {
-            throw new InvaildAccountNumberException();
+        if ($accountDto->getBalance() < $withdrawDto->getAmount()) {
+            throw new NotEnoughBalanceException();
         }
+
+        return true;
     }
 }

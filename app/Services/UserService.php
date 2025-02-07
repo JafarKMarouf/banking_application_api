@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Dtos\UserDto;
+use App\Exceptions\InvaildPinException;
 use App\Exceptions\InvalidPinLength;
 use App\Exceptions\NotSetupPin;
 use App\Exceptions\PinHasAlreadyBeenSet;
@@ -117,6 +118,9 @@ class UserService implements UserServiceInterface
         if (!$this->hasSetPin($user)) {
             throw new NotSetupPin();
         }
-        return Hash::check($pin, $user->pin);
+        if (!Hash::check($pin, $user->pin)) {
+            throw new InvaildPinException();
+        }
+        return true;
     }
 }

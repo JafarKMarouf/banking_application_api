@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Events\DepositEvent;
 use App\Events\TransactionEvent;
 use App\Listeners\DepositListener;
+use App\Listeners\WithdrawListener;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -21,8 +22,9 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
-        DepositEvent::class => [
+        TransactionEvent::class => [
             DepositListener::class,
+            WithdrawListener::class,
         ],
     ];
 

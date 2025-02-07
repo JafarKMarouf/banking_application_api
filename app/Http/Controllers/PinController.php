@@ -35,7 +35,7 @@ class PinController extends Controller
         $user = $request->user();
         $is_valid = $userService->validatePin($user->id, $request->input('pin'));
         return  Response::success([
-            'is_valid' => $is_valid,
+            'is valid' => $is_valid,
         ], "Pin validated Successfully");
     }
 

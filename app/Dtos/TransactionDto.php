@@ -307,4 +307,32 @@ class TransactionDto
             'amount' => $transactionDto->getAmount(),
         ];
     }
+    public static function forWithdraw(
+        AccountDto $accountDto,
+        string $reference,
+        $amount,
+        $description
+    ): TransactionDto {
+        $dto = new TransactionDto();
+        $dto->setUserId($accountDto->getUserId())
+            ->setAccountId($accountDto->getId())
+            ->setReference($reference)
+            ->setAmount($amount)
+            ->setCategory(TransactionCategoryEnum::WITHDRAW->value)
+            ->setDate(Carbon::now())
+            ->setDescription($description);
+        return $dto;
+    }
+    public static function forWithdrawToArray(TransactionDto $transactionDto): array
+    {
+        return [
+            'user_id' => $transactionDto->getUserId(),
+            'reference' => $transactionDto->getReference(),
+            'account_id' => $transactionDto->getAccountId(),
+            'date' => $transactionDto->getDate(),
+            'category' => $transactionDto->getCategory(),
+            'description' => $transactionDto->getDescription(),
+            'amount' => $transactionDto->getAmount(),
+        ];
+    }
 }

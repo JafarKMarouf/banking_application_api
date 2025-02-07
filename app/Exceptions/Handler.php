@@ -138,12 +138,42 @@ class Handler extends ExceptionHandler
                 );
             }
             if ($e instanceof InvaildAccountNumberException) {
-                $status_code = HttpFoundationResponse::HTTP_BAD_REQUEST;
+                $status_code = HttpFoundationResponse::HTTP_NOT_FOUND;
                 return Response::error(
-                    'Invaild Account Number',
+                    'Account Number does not be exist',
                     $status_code
                 );
             }
+            if ($e instanceof InvaildPinException) {
+                $status_code = HttpFoundationResponse::HTTP_BAD_REQUEST;
+                return Response::error(
+                    'invaild pin!',
+                    $status_code
+                );
+            }
+
+            if ($e instanceof DepositAmountToLowException) {
+                $status_code = HttpFoundationResponse::HTTP_BAD_REQUEST;
+                return Response::error(
+                    "Deposit amount must be equal or greater than 500",
+                    $status_code
+                );
+            }
+            if ($e instanceof WithdrawAmountToLowException) {
+                $status_code = HttpFoundationResponse::HTTP_BAD_REQUEST;
+                return Response::error(
+                    "Withdraw amount must be equal or greater than 500",
+                    $status_code
+                );
+            }
+            if ($e instanceof NotEnoughBalanceException) {
+                $status_code = HttpFoundationResponse::HTTP_BAD_REQUEST;
+                return Response::error(
+                    "your balance don't enough!",
+                    $status_code
+                );
+            }
+
             if ($e instanceof AuthorizationException) {
                 $status_code = HttpFoundationResponse::HTTP_UNAUTHORIZED;
                 return Response::error($e->getMessage(), $status_code);

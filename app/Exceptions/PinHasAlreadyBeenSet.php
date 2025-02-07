@@ -4,7 +4,4 @@ namespace App\Exceptions;
 
 use Exception;
 
-class PinHasAlreadyBeenSet extends Exception
-{
-    //
-}
+class PinHasAlreadyBeenSet extends Exception {}

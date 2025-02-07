@@ -31,7 +31,7 @@ class TransactionService implements TransactionServiceInterface
             $data = $transactionDto->forDepositToArray($transactionDto);
         }
         if ($transactionDto->getCategory() == TransactionCategoryEnum::WITHDRAW->value) {
-            $data = [];
+            $data = $transactionDto->forWithdrawToArray($transactionDto);
         }
         $transaction = $this->modelQuery()->create($data);
         return $transaction;
