@@ -15,6 +15,7 @@ class DepositAccountController extends Controller
     public function store(DepositRequest $depositRequest): JsonResponse
     {
         $depositRequest->validated();
+
         $depositDto = DepositDto::fromApiFormRequest($depositRequest);
         $this->accountService->deposit($depositDto);
         return Response::success([], 'Deposit Successfully');

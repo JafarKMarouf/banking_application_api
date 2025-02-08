@@ -140,7 +140,7 @@ class Handler extends ExceptionHandler
             if ($e instanceof InvaildAccountNumberException) {
                 $status_code = HttpFoundationResponse::HTTP_NOT_FOUND;
                 return Response::error(
-                    'Account Number does not be exist',
+                    'Invaild your account number',
                     $status_code
                 );
             }
@@ -167,7 +167,7 @@ class Handler extends ExceptionHandler
                 );
             }
             if ($e instanceof NotEnoughBalanceException) {
-                $status_code = HttpFoundationResponse::HTTP_BAD_REQUEST;
+                $status_code = HttpFoundationResponse::HTTP_FORBIDDEN;
                 return Response::error(
                     "your balance don't enough!",
                     $status_code

@@ -125,14 +125,21 @@ class AccountService implements AccountServiceInterface
         if ($depositDto->getAmount() < $minimun_amount) {
             throw new DepositAmountToLowException($minimun_amount);
         }
-
         try {
             DB::beginTransaction();
             $accountQuery = $this->modelQuery()->where(
                 'account_number',
                 $depositDto->getAccount_number()
             );
+
             $this->accountExist($accountQuery);
+            $this->vaildAccountNumber($depositDto->getAccount_number());
+
+            $user_id = auth()->user()->id;
+            $account = $this->getAccountByUserId($user_id);
+            if ($account->account_number != $depositDto->getAccount_number()) {
+                throw new InvaildAccountNumberException();
+            }
             $lockedAccount = $accountQuery->lockForUpdate()->first();
             $accountDto = AccountDto::fromModel($lockedAccount);
             $transactionDto = TransactionDto::forDeposit(
@@ -170,9 +177,11 @@ class AccountService implements AccountServiceInterface
             $this->accountExist($accountQuery);
             $lockedAccount = $accountQuery->lockForUpdate()->first();
 
-            $accountDto = new AccountDto();
-            $accountDto->fromModel($lockedAccount);
-            if (!$this->userService->validatePin($accountDto->getUserId(), $withdrawDto->getPin())) {
+            $accountDto = AccountDto::fromModel($lockedAccount);
+            if (!$this->userService->validatePin(
+                $accountDto->getUserId(),
+                $withdrawDto->getPin()
+            )) {
                 throw new InvaildPinException();
             }
             $this->canWithdraw($accountDto, $withdrawDto);
@@ -201,5 +210,16 @@ class AccountService implements AccountServiceInterface
         }
 
         return true;
+    }
+    /**
+     * @inheritDoc
+     */
+    public function vaildAccountNumber(string $account_number): void
+    {
+        $user_id = auth()->user()->id;
+        $account = $this->getAccountByUserId(userId: $user_id);
+        if ($account->account_number != $account_number) {
+            throw new InvaildAccountNumberException();
+        }
     }
 }

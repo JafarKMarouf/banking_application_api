@@ -18,12 +18,14 @@ class WithdrawAccountController extends Controller
         $account = $this->accountService->getAccountByUserId($withdrawRequest->user()->id);
 
         $withdrawDto = new WithdrawDto();
+
         $withdrawDto->setAccountNumber($account->account_number);
         $withdrawDto->setPin($withdrawRequest->input('pin'));
         $withdrawDto->setAmount($withdrawRequest->input('amount'));
         $withdrawDto->setDescription($withdrawRequest->input('description'));
-        // dd($withdrawDto);
+
         $this->accountService->withdraw($withdrawDto);
+
         return Response::success([], 'Withdraw Successfully');
     }
 }

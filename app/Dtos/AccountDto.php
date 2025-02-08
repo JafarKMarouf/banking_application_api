@@ -13,7 +13,7 @@ class AccountDto implements DtoInterface
 {
 
     private int $id;
-    private int $userId;
+    public int $userId;
     private string $accountNumber;
     private float $balance;
     private Carbon $created_at;

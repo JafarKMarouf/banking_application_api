@@ -25,6 +25,8 @@ interface AccountServiceInterface
 
     public function accountExist(Builder $accountQuery): void;
 
+    public function vaildAccountNumber(string $account_number): void;
+
     public function deposit(DepositDto $depositDto): void;
 
     public function withdraw(WithdrawDto $withdrawDto): void;
