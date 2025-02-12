@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Dtos\WithdrawDto;
-use App\Http\Requests\WithdrawRequest;
+use App\Http\Requests\StoreWithdrawRequest;
 use App\Http\Response\Response;
 use App\Services\AccountService;
 use Illuminate\Http\JsonResponse;
@@ -12,7 +12,7 @@ class WithdrawAccountController extends Controller
 {
     public function __construct(private readonly AccountService $accountService) {}
 
-    public function store(WithdrawRequest $withdrawRequest): JsonResponse
+    public function store(StoreWithdrawRequest $withdrawRequest): JsonResponse
     {
         $withdrawRequest->validated();
         $account = $this->accountService->getAccountByUserId($withdrawRequest->user()->id);

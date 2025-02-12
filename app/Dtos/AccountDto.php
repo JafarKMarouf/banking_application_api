@@ -21,7 +21,7 @@ class AccountDto implements DtoInterface
     /**
      * @inheritDoc
      */
-    public static function fromApiFormRequest(FormRequest $request): DtoInterface
+    public static function fromApiFormRequest(FormRequest $request): AccountDto
     {
         $accountDto = new AccountDto();
         return $accountDto;
@@ -30,7 +30,7 @@ class AccountDto implements DtoInterface
     /**
      * @inheritDoc
      */
-    public static function fromModel(Model $account): DtoInterface
+    public static function fromModel(Model $account): AccountDto
     {
         $accountDto = new AccountDto();
         $accountDto->setId($account->id);

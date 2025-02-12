@@ -17,7 +17,6 @@ interface TransactionServiceInterface
     public function generateReference(): string;
 
     public function createTransaction(TransactionDto $transactionDto): Transcation;
-
     public function getTransactionByReference(string $reference): Transcation;
     public function getTransactionById(int $id): Transcation;
 
@@ -31,4 +30,5 @@ interface TransactionServiceInterface
     ): Collection;
 
     public function updateTransactionBalance(string $reference, float|int $balance): void;
+    public function updateTransferId(string $reference, int $transferId): void;
 }

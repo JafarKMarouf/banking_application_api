@@ -3,9 +3,6 @@
 namespace App\Dtos;
 
 use App\Enums\TransactionCategoryEnum;
-use App\Interfaces\DtoInterface;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Http\FormRequest;
 
 class WithdrawDto
 {

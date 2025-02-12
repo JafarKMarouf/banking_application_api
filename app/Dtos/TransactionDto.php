@@ -3,10 +3,7 @@
 namespace App\Dtos;
 
 use App\Enums\TransactionCategoryEnum;
-use App\Interfaces\DtoInterface;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Http\FormRequest;
 
 class TransactionDto
 {
@@ -14,7 +11,7 @@ class TransactionDto
     private string $reference;
     private int $userId;
     private int $accountId;
-    private int $transferId;
+    private ?int $transferId;
     private float $amount;
     private float $balance;
     private string $category;

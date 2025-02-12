@@ -13,8 +13,10 @@ class WithdrawListener
     /**
      * Create the event listener.
      */
-    public function __construct(private readonly TransactionService $transactionService)
-    {
+    public function __construct(
+        private readonly TransactionService $transactionService
+
+    ) {
         //
     }
 
@@ -26,7 +28,7 @@ class WithdrawListener
         if ($event->transactionDto->getCategory() != TransactionCategoryEnum::WITHDRAW->value) {
             return;
         }
-        $this->transactionService->createTransaction($event->transactionDto);
+        $transaction = $this->transactionService->createTransaction($event->transactionDto);
         $account = $event->lockedAccount;
         $account->balance -= $event->transactionDto->getAmount();
         $account->save();
@@ -35,5 +37,11 @@ class WithdrawListener
             $event->transactionDto->getReference(),
             $account->balance
         );
+        if ($transaction->getTransferId) {
+            $this->transactionService->updateTransferId(
+                $event->transactionDto->getReference(),
+                $event->transactionDto->getTransferId()
+            );
+        }
     }
 }

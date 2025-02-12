@@ -98,11 +98,11 @@ class DepositDto implements DtoInterface
      */
     public static function fromApiFormRequest(FormRequest $request): DtoInterface
     {
-        $dto = new DepositDto();
-        $dto->setAccount_number($request->input('account_number'));
-        $dto->setAmount($request->input('amount'));
-        $dto->setDescription($request->input('description'));
-        return $dto;
+        $depositDto = new DepositDto();
+        $depositDto->setAccount_number($request->input('account_number'));
+        $depositDto->setAmount($request->input('amount'));
+        $depositDto->setDescription($request->input('description'));
+        return $depositDto;
     }
 
     /**

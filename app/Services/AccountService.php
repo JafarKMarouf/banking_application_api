@@ -5,30 +5,29 @@ namespace App\Services;
 use App\Dtos\AccountDto;
 use App\Dtos\DepositDto;
 use App\Dtos\TransactionDto;
+use App\Dtos\TransferDto;
 use App\Dtos\UserDto;
 use App\Dtos\WithdrawDto;
-use App\Events\DepositEvent;
 use App\Events\TransactionEvent;
 use App\Exceptions\AccountNumberExistsException;
-use App\Exceptions\AmountToLowDepositException;
-use App\Exceptions\AmountToLowWithdrawException;
-use App\Exceptions\DepositAmountToLowException;
+use App\Exceptions\AmountToLowException;
 use App\Exceptions\InvaildAccountNumberException;
 use App\Exceptions\InvaildPinException;
 use App\Exceptions\NotEnoughBalanceException;
-use App\Exceptions\WithdrawAmountToLowException;
 use App\Interfaces\AccountServiceInterface;
 use App\Models\Account;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\Response as HttpFoundationResponse;
 
 class AccountService implements AccountServiceInterface
 {
 
     public function __construct(
         private readonly UserService $userService,
-        private readonly TransactionService $transactionService
+        private readonly TransactionService $transactionService,
+        private readonly TransferService $transferService,
     ) {}
 
     /**
@@ -116,6 +115,26 @@ class AccountService implements AccountServiceInterface
             throw new InvaildAccountNumberException();
         }
     }
+    public function canWithdraw(AccountDto $accountDto, WithdrawDto $withdrawDto): bool
+    {
+        if ($accountDto->getBalance() < $withdrawDto->getAmount()) {
+            throw new NotEnoughBalanceException();
+        }
+
+        return true;
+    }
+    /**
+     * @inheritDoc
+     */
+    public function vaildAccountNumber(string $account_number): void
+    {
+        $user_id = auth()->user()->id;
+        $account = $this->getAccountByUserId(userId: $user_id);
+        if ($account->account_number != $account_number) {
+            throw new InvaildAccountNumberException();
+        }
+    }
+
     /**
      * @inheritDoc
      */
@@ -123,7 +142,10 @@ class AccountService implements AccountServiceInterface
     {
         $minimun_amount  = 500;
         if ($depositDto->getAmount() < $minimun_amount) {
-            throw new DepositAmountToLowException($minimun_amount);
+            throw new AmountToLowException(
+                "amount must be equal or greater than $minimun_amount",
+                HttpFoundationResponse::HTTP_BAD_REQUEST
+            );
         }
         try {
             DB::beginTransaction();
@@ -148,6 +170,7 @@ class AccountService implements AccountServiceInterface
                 $depositDto->getAmount(),
                 $depositDto->getDescription(),
             );
+            // dd($transactionDto);
             event(new TransactionEvent(
                 $transactionDto,
                 $accountDto,
@@ -166,7 +189,10 @@ class AccountService implements AccountServiceInterface
     {
         $minimun_amount  = 500;
         if ($withdrawDto->getAmount() < $minimun_amount) {
-            throw new WithdrawAmountToLowException($minimun_amount);
+            throw new AmountToLowException(
+                "amount must be equal or greater than $minimun_amount",
+                HttpFoundationResponse::HTTP_BAD_REQUEST
+            );
         }
         try {
             DB::beginTransaction();
@@ -191,35 +217,126 @@ class AccountService implements AccountServiceInterface
                 $withdrawDto->getAmount(),
                 $withdrawDto->getDescription(),
             );
-            event(new TransactionEvent(
-                $transactionDto,
-                $accountDto,
-                $lockedAccount
-            ));
+
+            event(
+                new TransactionEvent(
+                    $transactionDto,
+                    $accountDto,
+                    $lockedAccount
+                )
+            );
             DB::commit();
         } catch (Exception $exception) {
             DB::rollBack();
             throw $exception;
         }
     }
-
-    public function canWithdraw(AccountDto $accountDto, WithdrawDto $withdrawDto): bool
-    {
-        if ($accountDto->getBalance() < $withdrawDto->getAmount()) {
-            throw new NotEnoughBalanceException();
-        }
-
-        return true;
-    }
     /**
      * @inheritDoc
      */
-    public function vaildAccountNumber(string $account_number): void
-    {
-        $user_id = auth()->user()->id;
-        $account = $this->getAccountByUserId(userId: $user_id);
-        if ($account->account_number != $account_number) {
-            throw new InvaildAccountNumberException();
+    public function transfer(
+        string $senderAccountNumber,
+        string $recipientAccountNumber,
+        string $senderAccountPin,
+        int|float $amount,
+        string $description = null
+    ): void {
+        $minimun_amount  = 300;
+        if ($senderAccountNumber == $recipientAccountNumber) {
+            throw new Exception('send account number and reciever account number must not be to the same');
+        }
+        if ($amount < $minimun_amount) {
+            throw new AmountToLowException(
+                "amount must be equal or greater than $minimun_amount",
+                HttpFoundationResponse::HTTP_BAD_REQUEST
+            );
+        }
+        try {
+            DB::beginTransaction();
+            $senderAccountQuery = $this->modelQuery()->where(
+                'account_number',
+                $senderAccountNumber
+            );
+            $recipientAccountQuery = $this->modelQuery()->where(
+                'account_number',
+                $recipientAccountNumber
+            );
+
+            $this->accountExist($senderAccountQuery);
+            $this->accountExist($recipientAccountQuery);
+
+            $lockedSenderAccount = $senderAccountQuery->lockForUpdate()->first();
+            $lockedRecipientAccount = $recipientAccountQuery->lockForUpdate()->first();
+
+            $senderAccountDto = AccountDto::fromModel($lockedSenderAccount);
+            $recipientAccountDto = AccountDto::fromModel($lockedRecipientAccount);
+
+            if (!$this->userService->validatePin(
+                $senderAccountDto->getUserId(),
+                $senderAccountPin
+            )) {
+                throw new InvaildPinException();
+            }
+
+            $withdrawDto = new WithdrawDto();
+            $depositDto = new DepositDto();
+
+            $withdrawDto->setAccountNumber($senderAccountDto->getAccountNumber());
+            $withdrawDto->setPin($senderAccountPin);
+            $withdrawDto->setAmount($amount);
+            $withdrawDto->setDescription($description);
+
+            $this->canWithdraw($senderAccountDto, $withdrawDto);
+
+            $transactionWithdrawDto = TransactionDto::forWithdraw(
+                $senderAccountDto,
+                $this->transactionService->generateReference(),
+                $withdrawDto->getAmount(),
+                $withdrawDto->getDescription(),
+            );
+            $depositDto->setAccount_number($recipientAccountDto->getAccountNumber());
+            $depositDto->setAmount($amount);
+            $depositDto->setDescription($description);
+
+            $transactionDepositDto = TransactionDto::forDeposit(
+                $recipientAccountDto,
+                $this->transactionService->generateReference(),
+                $depositDto->getAmount(),
+                $depositDto->getDescription(),
+            );
+
+            $transferDto = new TransferDto();
+            $transferDto->setReference($this->transferService->generateReference());
+
+            $transferDto->setSenderAccountId($senderAccountDto->getId());
+            $transferDto->setSenderId($senderAccountDto->getUserId());
+
+            $transferDto->setRecipientAccountId($recipientAccountDto->getId());
+            $transferDto->setRecipientId($recipientAccountDto->getUserId());
+
+            $transferDto->setAmount($amount);
+
+            $transfer = $this->transferService->createTransfer($transferDto);
+
+            $transactionDepositDto->setTransferId($transfer->id);
+            $transactionWithdrawDto->setTransferId($transfer->id);
+
+            event(new TransactionEvent(
+                $transactionWithdrawDto,
+                $senderAccountDto,
+                $lockedSenderAccount
+            ));
+
+            event(new TransactionEvent(
+                $transactionDepositDto,
+                $recipientAccountDto,
+                $lockedRecipientAccount
+            ));
+
+            DB::commit();
+        } catch (Exception $exception) {
+            DB::rollBack();
+            throw $exception;
         }
     }
 }
