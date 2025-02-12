@@ -4,6 +4,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DepositAccountController;
 use App\Http\Controllers\PinController;
+use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\TransferController;
 use App\Http\Controllers\WithdrawAccountController;
 use Illuminate\Support\Facades\Route;
@@ -49,10 +50,18 @@ Route::middleware('auth:sanctum')->group(function () {
         });
 
     Route::middleware('has.set.pin')
-        ->prefix('account')
         ->group(function () {
-            Route::post('deposit', [DepositAccountController::class, 'store']);
-            Route::post('withdraw', [WithdrawAccountController::class, 'store']);
-            Route::post('transfer', [TransferController::class, 'store']);
+            Route::prefix('account')
+                ->group(function () {
+                    Route::post('deposit', [DepositAccountController::class, 'store']);
+                    Route::post('withdraw', [WithdrawAccountController::class, 'store']);
+                    Route::post('transfer', [TransferController::class, 'store']);
+                });
+
+            Route::prefix('transaction')
+                ->controller(TransactionController::class)
+                ->group(function () {
+                    Route::get('history', 'index');
+                });
         });
 });

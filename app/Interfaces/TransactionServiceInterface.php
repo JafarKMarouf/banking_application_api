@@ -18,10 +18,8 @@ interface TransactionServiceInterface
     public function createTransaction(TransactionDto $transactionDto): Transcation;
     public function getTransactionByReference(string $reference): Transcation;
     public function getTransactionById(int $id): Transcation;
-
-    public function getTransactionByAccountNumber(string $accountNumber): Builder;
-    public function getTransactionByUserId(int $userId): Builder;
-
+    public function getTransactionByAccountNumber(string $accountNumber, Builder $builder): Builder;
+    public function getTransactionByUserId(int $userId, Builder $builder): Builder;
     public function downloadTransactionHistory(
         AccountDto $accountDto,
         Carbon $fromDate,

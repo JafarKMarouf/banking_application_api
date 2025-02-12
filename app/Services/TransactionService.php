@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Dtos\AccountDto;
 use App\Dtos\TransactionDto;
 use App\Enums\TransactionCategoryEnum;
+use App\Exceptions\ANotFoundException;
 use App\Interfaces\TransactionServiceInterface;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -50,14 +51,14 @@ class TransactionService implements TransactionServiceInterface
     /**
      * @inheritDoc
      */
-    public function getTransactionByAccountNumber(string $account_number): Builder {}
-
-    /**
-     * @inheritDoc
-     */
     public function getTransactionById(int $id): Transcation
     {
-        return $this->modelQuery()->where('id', $id)->first();
+        $transaction = $this->modelQuery()->where('id', $id)->first();
+
+        if (!$transaction) {
+            throw new ANotFoundException('transaction with the supplied reference does not exist');
+        }
+        return $transaction;
     }
 
     /**
@@ -65,12 +66,13 @@ class TransactionService implements TransactionServiceInterface
      */
     public function getTransactionByReference(string $reference): Transcation
     {
-        return $this->modelQuery()->where('reference', $reference)->first();
+        $transaction = $this->modelQuery()
+            ->where('reference', $reference)->first();
+        if (!$transaction) {
+            throw new ANotFoundException('transaction with the supplied id does not exist');
+        }
+        return $transaction;
     }
-    /**
-     * @inheritDoc
-     */
-    public function getTransactionByUserId(int $userId): Builder {}
     /**
      * @inheritDoc
      */
@@ -97,5 +99,22 @@ class TransactionService implements TransactionServiceInterface
             ->update([
                 'transfer_id' => $transferId,
             ]);
+    }
+    /**
+     * @inheritDoc
+     */
+    public function getTransactionByAccountNumber(string $accountNumber, Builder $builder): Builder
+    {
+        return $builder->whereHas('account', function ($query) use ($accountNumber): void {
+            $query->where('account_number', $accountNumber);
+        });
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getTransactionByUserId(int $userId, Builder $builder): Builder
+    {
+        return $builder->where('user_id', $userId);
     }
 }
