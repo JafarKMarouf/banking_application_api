@@ -6,7 +6,6 @@ use App\Dtos\AccountDto;
 use App\Dtos\TransactionDto;
 use App\Models\Transcation;
 use Carbon\Carbon;
-use Illuminate\Contracts\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 

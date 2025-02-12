@@ -3,8 +3,6 @@
 namespace App\Dtos;
 
 use App\Interfaces\DtoInterface;
-use App\Models\Account;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;

@@ -99,7 +99,6 @@ trait ApiResponseTrait
 
     public function sendValidationError(ValidationException $validationException): JsonResponse
     {
-        // return $this->sendError($message);
         return $this->apiResponse([
             'success' => false,
             'message' => $validationException->getMessage(),

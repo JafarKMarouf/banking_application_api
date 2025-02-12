@@ -5,8 +5,6 @@ namespace App\Listeners;
 use App\Enums\TransactionCategoryEnum;
 use App\Events\TransactionEvent;
 use App\Services\TransactionService;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
 class WithdrawListener
 {
@@ -16,9 +14,7 @@ class WithdrawListener
     public function __construct(
         private readonly TransactionService $transactionService
 
-    ) {
-        //
-    }
+    ) {}
 
     /**
      * Handle the event.

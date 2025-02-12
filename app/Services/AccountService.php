@@ -170,7 +170,6 @@ class AccountService implements AccountServiceInterface
                 $depositDto->getAmount(),
                 $depositDto->getDescription(),
             );
-            // dd($transactionDto);
             event(new TransactionEvent(
                 $transactionDto,
                 $accountDto,

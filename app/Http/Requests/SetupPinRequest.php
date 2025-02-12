@@ -29,8 +29,8 @@ class SetupPinRequest extends FormRequest
     {
         return [
             'pin.required' => 'The pin is required.',
-            // 'pin.min' => 'The pin must be at least 4 characters.',
-            // 'pin.max' => 'The pin may not be greater than 4 characters.',
+            'pin.min' => 'The pin must be at least 4 characters.',
+            'pin.max' => 'The pin may not be greater than 4 characters.',
         ];
     }
 }

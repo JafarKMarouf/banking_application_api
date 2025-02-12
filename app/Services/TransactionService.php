@@ -55,12 +55,18 @@ class TransactionService implements TransactionServiceInterface
     /**
      * @inheritDoc
      */
-    public function getTransactionById(int $id): Transcation {}
+    public function getTransactionById(int $id): Transcation
+    {
+        return $this->modelQuery()->where('id', $id)->first();
+    }
 
     /**
      * @inheritDoc
      */
-    public function getTransactionByReference(string $reference): Transcation {}
+    public function getTransactionByReference(string $reference): Transcation
+    {
+        return $this->modelQuery()->where('reference', $reference)->first();
+    }
     /**
      * @inheritDoc
      */
@@ -72,7 +78,9 @@ class TransactionService implements TransactionServiceInterface
         AccountDto $accountDto,
         Carbon $fromDate,
         Carbon $toDate
-    ): Collection {}
+    ): Collection {
+        return Collection::empty();
+    }
 
     public function updateTransactionBalance(string $reference, float|int $balance): void
     {

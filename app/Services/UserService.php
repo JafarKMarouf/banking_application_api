@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Dtos\UserDto;
 use App\Exceptions\InvaildPinException;
-use App\Exceptions\InvalidPinLength;
 use App\Exceptions\NotSetupPin;
 use App\Exceptions\PinHasAlreadyBeenSet;
 use App\Interfaces\UserServiceInterface;

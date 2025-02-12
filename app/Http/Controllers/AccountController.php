@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Dtos\DepositDto;
 use App\Dtos\UserDto;
-use App\Http\Requests\DepositRequest;
 use App\Http\Response\Response;
 use App\Services\AccountService;
 use Illuminate\Http\Request;
@@ -13,7 +11,7 @@ class AccountController extends Controller
 {
     public function __construct(private readonly AccountService $accountService) {}
 
-    public function getAccount($identifier)
+    public function getAccount($identifier): void
     {
         $this->accountService->getAccount($identifier);
     }

@@ -4,7 +4,6 @@ namespace App\Interfaces;
 
 use App\Dtos\AccountDto;
 use App\Dtos\DepositDto;
-use App\Dtos\TransferDto;
 use App\Dtos\UserDto;
 use App\Dtos\WithdrawDto;
 use App\Models\Account;

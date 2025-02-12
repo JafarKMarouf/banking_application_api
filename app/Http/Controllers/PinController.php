@@ -12,7 +12,6 @@ class PinController extends Controller
 {
     public function __construct(private readonly UserService $userService) {}
 
-    // public function __construct(private readonly UserService $userService) {}
     /**
      * @param \App\Http\Requests\SetupPinRequest $request
      * @return JsonResponse

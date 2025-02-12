@@ -6,7 +6,6 @@ use App\Http\Controllers\DepositAccountController;
 use App\Http\Controllers\PinController;
 use App\Http\Controllers\TransferController;
 use App\Http\Controllers\WithdrawAccountController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*

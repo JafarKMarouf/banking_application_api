@@ -3,9 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use \Illuminate\Contracts\Validation\Validator;
-use App\Http\Response\Response;
-use Illuminate\Validation\ValidationException;
 
 class LoginUserRequest extends FormRequest
 {
@@ -39,10 +36,4 @@ class LoginUserRequest extends FormRequest
             'password.string' => 'The password must be a string.',
         ];
     }
-
-    // protected function failedValidation(Validator $validator)
-    // {
-    //     $response = Response::validation($validator->errors());
-    //     throw new ValidationException($validator, $response);
-    // }
 }

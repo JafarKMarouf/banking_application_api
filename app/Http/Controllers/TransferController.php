@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Dtos\TransferDto;
 use App\Http\Requests\StoreTransferRequest;
 use App\Http\Response\Response;
 use App\Services\AccountService;

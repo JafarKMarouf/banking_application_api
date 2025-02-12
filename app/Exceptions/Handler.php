@@ -152,14 +152,6 @@ class Handler extends ExceptionHandler
                 );
             }
 
-
-            // if ($e instanceof AmountToLowException) {
-            //     $status_code = HttpFoundationResponse::HTTP_BAD_REQUEST;
-            //     return Response::error(
-            //         "amount must be equal or greater than 500",
-            //         $status_code
-            //     );
-            // }
             if ($e instanceof NotEnoughBalanceException) {
                 $status_code = HttpFoundationResponse::HTTP_FORBIDDEN;
                 return Response::error(
