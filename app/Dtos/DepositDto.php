@@ -17,7 +17,7 @@ class DepositDto implements DtoInterface
     /**
      * Get the value of category
      */
-    public function getCategory()
+    public function getCategory(): string
     {
         return $this->category;
     }
@@ -27,7 +27,7 @@ class DepositDto implements DtoInterface
      *
      * @return  self
      */
-    public function setCategory()
+    public function setCategory(): static
     {
         $this->category = TransactionCategoryEnum::DEPOSIT->value;
 
@@ -37,17 +37,17 @@ class DepositDto implements DtoInterface
     /**
      * Get the value of description
      */
-    public function getDescription()
+    public function getDescription(): string
     {
         return $this->description;
     }
 
     /**
      * Set the value of description
-     *
+     * @param string $description
      * @return  self
      */
-    public function setDescription($description)
+    public function setDescription(string $description): static
     {
         $this->description = $description;
 
@@ -57,17 +57,17 @@ class DepositDto implements DtoInterface
     /**
      * Get the value of amount
      */
-    public function getAmount()
+    public function getAmount(): float
     {
         return $this->amount;
     }
 
     /**
      * Set the value of amount
-     *
+     * @param int|float $amount
      * @return  self
      */
-    public function setAmount($amount)
+    public function setAmount(int|float $amount): static
     {
         $this->amount = $amount;
 
@@ -77,25 +77,22 @@ class DepositDto implements DtoInterface
     /**
      * Get the value of account_number
      */
-    public function getAccount_number()
+    public function getAccount_number(): string
     {
         return $this->account_number;
     }
 
     /**
      * Set the value of account_number
-     *
+     * @param string $account_number
      * @return  self
      */
-    public function setAccount_number($account_number)
+    public function setAccount_number(string $account_number): static
     {
         $this->account_number = $account_number;
 
         return $this;
     }
-    /**
-     * @inheritDoc
-     */
     public static function fromApiFormRequest(FormRequest $request): DtoInterface
     {
         $depositDto = new DepositDto();
@@ -105,18 +102,11 @@ class DepositDto implements DtoInterface
         return $depositDto;
     }
 
-    /**
-     * @inheritDoc
-     */
     public static function fromModel(Model $model): DtoInterface
     {
-        $dto = new DepositDto();
-        return $dto;
+        return new DepositDto();
     }
 
-    /**
-     * @inheritDoc
-     */
     public static function toArray(Model $model): array
     {
         return [];

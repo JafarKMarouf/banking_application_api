@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Account;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class UserSeed extends Seeder
@@ -13,9 +13,8 @@ class UserSeed extends Seeder
      */
     public function run(): void
     {
-        User::factory()
-            ->count(2)
-            ->hasAccount(1)
+        User::factory(2)
+            ->has(Account::factory(1))
             ->create();
     }
 }

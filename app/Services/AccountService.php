@@ -11,9 +11,10 @@ use App\Dtos\WithdrawDto;
 use App\Events\TransactionEvent;
 use App\Exceptions\AccountNumberExistsException;
 use App\Exceptions\AmountToLowException;
-use App\Exceptions\InvaildAccountNumberException;
-use App\Exceptions\InvaildPinException;
+use App\Exceptions\InvalidAccountNumberException;
+use App\Exceptions\InvalidPinException;
 use App\Exceptions\NotEnoughBalanceException;
+use App\Exceptions\NotSetupPin;
 use App\Interfaces\AccountServiceInterface;
 use App\Models\Account;
 use Exception;
@@ -31,7 +32,8 @@ class AccountService implements AccountServiceInterface
     ) {}
 
     /**
-     * @inheritDoc
+     *
+     * @throws AccountNumberExistsException
      */
     public function createAccountNumber(UserDto $userDto): Account
     {
@@ -50,37 +52,26 @@ class AccountService implements AccountServiceInterface
                 6
             ) . $randomDigits;
 
-        $account = $this->modelQuery()->create([
+        /** @var Account $account */
+        $account =  $this->modelQuery()->create([
             'account_number' => $mixedAccountNumber,
             'user_id' => $userDto->getId(),
         ]);
         return $account;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getAccount(int|string $accountNumberOrUserId): Account
-    {
-        dd($accountNumberOrUserId);
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function getAccountByAccountNumber(string $accountNumber): Account
     {
-        $account =  $this->modelQuery()
+        /** @var Account $account */
+        $account = $this->modelQuery()
             ->where('account_number', $accountNumber)
             ->first();
         return $account;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function getAccountByUserId(int $userId): Account
     {
+        /** @var Account $account */
         $account = $this->modelQuery()
             ->where('user_id', $userId)
             ->first();
@@ -88,16 +79,11 @@ class AccountService implements AccountServiceInterface
         return $account;
     }
 
-    /**
-     * @inheritDoc
-     */
+
     public function modelQuery(): Builder
     {
         return Account::query();
     }
-    /**
-     * @inheritDoc
-     */
     public function hasAccountNumber(UserDto $userDto): bool
     {
         return $this->modelQuery()
@@ -105,16 +91,20 @@ class AccountService implements AccountServiceInterface
             ->exists();
     }
     /**
-     * @param \Illuminate\Database\Eloquent\Builder $accountQuery
-     * @throws \App\Exceptions\InvaildAccountNumberException
+     * @param Builder $accountQuery
      * @return void
+     * @throws InvalidAccountNumberException
      */
     public function accountExist(Builder $accountQuery): void
     {
-        if ($accountQuery->exists() == false) {
-            throw new InvaildAccountNumberException();
+        if (!$accountQuery->exists()) {
+            throw new InvalidAccountNumberException();
         }
     }
+
+    /**
+     * @throws NotEnoughBalanceException
+     */
     public function canWithdraw(AccountDto $accountDto, WithdrawDto $withdrawDto): bool
     {
         if ($accountDto->getBalance() < $withdrawDto->getAmount()) {
@@ -123,27 +113,32 @@ class AccountService implements AccountServiceInterface
 
         return true;
     }
+
     /**
-     * @inheritDoc
+     * @throws InvalidAccountNumberException
      */
-    public function vaildAccountNumber(string $account_number): void
+    public function validAccountNumber(string $account_number): void
     {
-        $user_id = auth()->user()->id;
-        $account = $this->getAccountByUserId(userId: $user_id);
-        if ($account->account_number != $account_number) {
-            throw new InvaildAccountNumberException();
+        $user_id = auth()->id();
+        $account = $this->getAccountByUserId(userId:$user_id);
+        if (!empty($account->account_number)) {
+            if ($account->account_number != $account_number) {
+                throw new InvalidAccountNumberException();
+            }
         }
     }
 
+
     /**
-     * @inheritDoc
+     * @throws InvalidAccountNumberException
+     * @throws AmountToLowException
      */
     public function deposit(DepositDto $depositDto): void
     {
-        $minimun_amount  = 500;
-        if ($depositDto->getAmount() < $minimun_amount) {
+        $minimum_amount  = 500;
+        if ($depositDto->getAmount() < $minimum_amount) {
             throw new AmountToLowException(
-                "amount must be equal or greater than $minimun_amount",
+                "amount must be equal or greater than $minimum_amount",
                 HttpFoundationResponse::HTTP_BAD_REQUEST
             );
         }
@@ -155,12 +150,14 @@ class AccountService implements AccountServiceInterface
             );
 
             $this->accountExist($accountQuery);
-            $this->vaildAccountNumber($depositDto->getAccount_number());
+            $this->validAccountNumber($depositDto->getAccount_number());
 
-            $user_id = auth()->user()->id;
+            $user_id = auth()->id();
             $account = $this->getAccountByUserId($user_id);
-            if ($account->account_number != $depositDto->getAccount_number()) {
-                throw new InvaildAccountNumberException();
+            if (!empty($account->account_number)) {
+                if ($account->account_number != $depositDto->getAccount_number()) {
+                    throw new InvalidAccountNumberException();
+                }
             }
             $lockedAccount = $accountQuery->lockForUpdate()->first();
             $accountDto = AccountDto::fromModel($lockedAccount);
@@ -170,6 +167,7 @@ class AccountService implements AccountServiceInterface
                 $depositDto->getAmount(),
                 $depositDto->getDescription(),
             );
+            /** @var Account $lockedAccount */
             event(new TransactionEvent(
                 $transactionDto,
                 $accountDto,
@@ -181,15 +179,20 @@ class AccountService implements AccountServiceInterface
             throw $exception;
         }
     }
+
     /**
-     * @inheritDoc
+     * @throws NotSetupPin
+     * @throws AmountToLowException
+     * @throws InvalidPinException
+     * @throws InvalidAccountNumberException
+     * @throws NotEnoughBalanceException
      */
     public function withdraw(WithdrawDto $withdrawDto): void
     {
-        $minimun_amount  = 500;
-        if ($withdrawDto->getAmount() < $minimun_amount) {
+        $minimum_amount  = 500;
+        if ($withdrawDto->getAmount() < $minimum_amount) {
             throw new AmountToLowException(
-                "amount must be equal or greater than $minimun_amount",
+                "amount must be equal or greater than $minimum_amount",
                 HttpFoundationResponse::HTTP_BAD_REQUEST
             );
         }
@@ -207,7 +210,7 @@ class AccountService implements AccountServiceInterface
                 $accountDto->getUserId(),
                 $withdrawDto->getPin()
             )) {
-                throw new InvaildPinException();
+                throw new InvalidPinException();
             }
             $this->canWithdraw($accountDto, $withdrawDto);
             $transactionDto = TransactionDto::forWithdraw(
@@ -217,6 +220,7 @@ class AccountService implements AccountServiceInterface
                 $withdrawDto->getDescription(),
             );
 
+            /** @var Account $lockedAccount */
             event(
                 new TransactionEvent(
                     $transactionDto,
@@ -230,8 +234,14 @@ class AccountService implements AccountServiceInterface
             throw $exception;
         }
     }
+
     /**
-     * @inheritDoc
+     * @throws NotSetupPin
+     * @throws AmountToLowException
+     * @throws InvalidPinException
+     * @throws InvalidAccountNumberException
+     * @throws NotEnoughBalanceException
+     * @throws Exception
      */
     public function transfer(
         string $senderAccountNumber,
@@ -240,13 +250,13 @@ class AccountService implements AccountServiceInterface
         int|float $amount,
         string $description = null
     ): void {
-        $minimun_amount  = 300;
+        $minimum_amount  = 300;
         if ($senderAccountNumber == $recipientAccountNumber) {
-            throw new Exception('send account number and reciever account number must not be to the same');
+            throw new Exception('send account number and receiver account number must not be to the same');
         }
-        if ($amount < $minimun_amount) {
+        if ($amount < $minimum_amount) {
             throw new AmountToLowException(
-                "amount must be equal or greater than $minimun_amount",
+                "amount must be equal or greater than $minimum_amount",
                 HttpFoundationResponse::HTTP_BAD_REQUEST
             );
         }
@@ -274,7 +284,7 @@ class AccountService implements AccountServiceInterface
                 $senderAccountDto->getUserId(),
                 $senderAccountPin
             )) {
-                throw new InvaildPinException();
+                throw new InvalidPinException();
             }
 
             $withdrawDto = new WithdrawDto();
@@ -320,12 +330,14 @@ class AccountService implements AccountServiceInterface
             $transactionDepositDto->setTransferId($transfer->id);
             $transactionWithdrawDto->setTransferId($transfer->id);
 
+            /** @var Account $lockedSenderAccount */
             event(new TransactionEvent(
                 $transactionWithdrawDto,
                 $senderAccountDto,
                 $lockedSenderAccount
             ));
 
+            /** @var Account $lockedRecipientAccount */
             event(new TransactionEvent(
                 $transactionDepositDto,
                 $recipientAccountDto,

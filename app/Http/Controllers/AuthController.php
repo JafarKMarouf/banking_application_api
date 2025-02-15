@@ -6,10 +6,8 @@ use App\Dtos\UserDto;
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\RegisterUserRequest;
 use App\Http\Response\Response;
-use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
@@ -17,17 +15,19 @@ class AuthController extends Controller
 
     /**
      *
-     * @param \App\Http\Requests\RegisterUserRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param RegisterUserRequest $request
+     * @return JsonResponse
      */
     public function register(RegisterUserRequest $request): JsonResponse
     {
         $request->validated();
         $userDto = UserDto::fromApiFormRequest($request);
         $ipAddress = $request->ip();
+
+        /** @var UserDto $userDto*/
         $response = $this->userService->createUser($userDto, $ipAddress);
 
-        return Response::success(
+        return Response::sendSuccess(
             $response['data'],
             $response['message'],
             201
@@ -39,10 +39,10 @@ class AuthController extends Controller
         $request->validated();
         $response = $this->userService->loginUser($request);
         return $response['code'] != 200 ?
-            Response::error(
+            Response::sendError(
                 $response['message'],
                 $response['code']
-            ) : Response::success(
+            ) : Response::sendSuccess(
                 $response['data'],
                 $response['message']
             );
@@ -50,15 +50,15 @@ class AuthController extends Controller
 
     public function logout(): JsonResponse
     {
-        $userId = auth()->user()->id;
-        User::find($userId)->tokens()->delete();
-        return Response::success([], 'User Logged out Successfully');
+        $user = request()->user();
+        $user->tokens()->delete();
+        return Response::sendSuccess([], 'User Logged out Successfully');
     }
 
-    public function user(Request $request): JsonResponse
+    public function user(): JsonResponse
     {
-        $user = auth()->user();
-        return Response::success(
+        $user = request()->user();
+        return Response::sendSuccess(
             $user,
             'Authenticated User retrieved'
         );

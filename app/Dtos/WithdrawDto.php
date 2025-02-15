@@ -16,7 +16,7 @@ class WithdrawDto
     /**
      * Get the value of category
      */
-    public function getCategory()
+    public function getCategory(): string
     {
         return $this->category;
     }
@@ -26,7 +26,7 @@ class WithdrawDto
      *
      * @return  self
      */
-    public function setCategory()
+    public function setCategory(): static
     {
         $this->category = TransactionCategoryEnum::WITHDRAW->value;
 
@@ -36,7 +36,7 @@ class WithdrawDto
     /**
      * Get the value of description
      */
-    public function getDescription()
+    public function getDescription(): string
     {
         return $this->description;
     }
@@ -44,9 +44,10 @@ class WithdrawDto
     /**
      * Set the value of description
      *
+     * @param $description
      * @return  self
      */
-    public function setDescription($description)
+    public function setDescription($description):static
     {
         $this->description = $description;
 
@@ -56,17 +57,17 @@ class WithdrawDto
     /**
      * Get the value of amount
      */
-    public function getAmount()
+    public function getAmount(): float
     {
         return $this->amount;
     }
 
     /**
      * Set the value of amount
-     *
+     * @param $amount
      * @return  self
      */
-    public function setAmount($amount)
+    public function setAmount($amount):static
     {
         $this->amount = $amount;
 
@@ -76,17 +77,17 @@ class WithdrawDto
     /**
      * Get the value of accountNumber
      */
-    public function getAccountNumber()
+    public function getAccountNumber(): string
     {
         return $this->accountNumber;
     }
 
     /**
      * Set the value of accountNumber
-     *
+     * @param $accountNumber
      * @return  self
      */
-    public function setAccountNumber($accountNumber)
+    public function setAccountNumber($accountNumber):static
     {
         $this->accountNumber = $accountNumber;
 

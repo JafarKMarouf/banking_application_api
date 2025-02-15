@@ -8,6 +8,7 @@ use App\Models\User;
 interface UserServiceInterface
 {
     public function createUser(UserDto $userDto, $ipAddress): array;
+
     public function loginUser($request): array;
     public function getUserById(int $userId): User;
     public function setupPin(User $user, string $pin): void;

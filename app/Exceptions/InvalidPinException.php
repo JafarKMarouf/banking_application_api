@@ -4,7 +4,7 @@ namespace App\Exceptions;
 
 use Exception;
 
-class InvaildPinException extends Exception
+class InvalidPinException extends Exception
 {
     //
 }

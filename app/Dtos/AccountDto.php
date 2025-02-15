@@ -3,6 +3,7 @@
 namespace App\Dtos;
 
 use App\Interfaces\DtoInterface;
+use App\Models\Account;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
@@ -16,35 +17,18 @@ class AccountDto implements DtoInterface
     private float $balance;
     private Carbon $created_at;
     private Carbon $updated_at;
-    /**
-     * @inheritDoc
-     */
-    public static function fromApiFormRequest(FormRequest $request): AccountDto
+
+
+    public static function fromModel(Model|Account $model): AccountDto
     {
         $accountDto = new AccountDto();
+        $accountDto->setId($model->id);
+        $accountDto->setUserId($model->user_id);
+        $accountDto->setAccountNumber($model->account_number);
+        $accountDto->setBalance($model->balance);
         return $accountDto;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public static function fromModel(Model $account): AccountDto
-    {
-        $accountDto = new AccountDto();
-        $accountDto->setId($account->id);
-        $accountDto->setUserId($account->user_id);
-        $accountDto->setAccountNumber($account->account_number);
-        $accountDto->setBalance($account->balance);
-        return $accountDto;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function toArray(Model $model): array
-    {
-        return [];
-    }
 
     /**
      * Get the value of id
@@ -54,12 +38,7 @@ class AccountDto implements DtoInterface
         return $this->id;
     }
 
-    /**
-     * Set the value of id
-     *
-     * @return  self
-     */
-    public function setId($id): static
+    public function setId(int $id): static
     {
         $this->id = $id;
 
@@ -74,12 +53,7 @@ class AccountDto implements DtoInterface
         return $this->userId;
     }
 
-    /**
-     * Set the value of userId
-     *
-     * @return  self
-     */
-    public function setUserId($userId)
+    public function setUserId(int $userId): static
     {
         $this->userId = $userId;
 
@@ -89,17 +63,12 @@ class AccountDto implements DtoInterface
     /**
      * Get the value of accountNumber
      */
-    public function getAccountNumber()
+    public function getAccountNumber(): string
     {
         return $this->accountNumber;
     }
 
-    /**
-     * Set the value of accountNumber
-     *
-     * @return  self
-     */
-    public function setAccountNumber($accountNumber)
+    public function setAccountNumber($accountNumber): static
     {
         $this->accountNumber = $accountNumber;
 
@@ -109,17 +78,12 @@ class AccountDto implements DtoInterface
     /**
      * Get the value of balance
      */
-    public function getBalance()
+    public function getBalance(): float
     {
         return $this->balance;
     }
 
-    /**
-     * Set the value of balance
-     *
-     * @return  self
-     */
-    public function setBalance($balance)
+    public function setBalance(float|int $balance): static
     {
         $this->balance = $balance;
 
@@ -129,17 +93,12 @@ class AccountDto implements DtoInterface
     /**
      * Get the value of created_at
      */
-    public function getCreated_at()
+    public function getCreated_at(): Carbon
     {
         return $this->created_at;
     }
 
-    /**
-     * Set the value of created_at
-     *
-     * @return  self
-     */
-    public function setCreated_at($created_at)
+    public function setCreated_at($created_at): static
     {
         $this->created_at = $created_at;
 
@@ -149,20 +108,34 @@ class AccountDto implements DtoInterface
     /**
      * Get the value of updated_at
      */
-    public function getUpdated_at()
+    public function getUpdated_at(): Carbon
     {
         return $this->updated_at;
     }
 
-    /**
-     * Set the value of updated_at
-     *
-     * @return  self
-     */
-    public function setUpdated_at($updated_at)
+    public function setUpdated_at($updated_at): static
     {
         $this->updated_at = $updated_at;
 
         return $this;
+    }
+
+
+    /**
+     * @param Model $model
+     * @return array
+     */
+    public static function toArray(Model $model): array
+    {
+        // TODO: Implement toArray() method.
+    }
+
+    /**
+     * @param FormRequest $request
+     * @return self
+     */
+    public static function fromApiFormRequest(FormRequest $request): DtoInterface
+    {
+        // TODO: Implement fromApiFormRequest() method.
     }
 }

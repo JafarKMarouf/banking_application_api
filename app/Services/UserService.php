@@ -3,13 +3,15 @@
 namespace App\Services;
 
 use App\Dtos\UserDto;
-use App\Exceptions\InvaildPinException;
+use App\Exceptions\InvalidPinException;
 use App\Exceptions\NotSetupPin;
 use App\Exceptions\PinHasAlreadyBeenSet;
 use App\Interfaces\UserServiceInterface;
 use App\Jobs\SendEmailVerificationJob;
 use App\Models\User;
 use App\Traits\OtpTrait;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -18,9 +20,9 @@ class UserService implements UserServiceInterface
 {
     use OtpTrait;
     /**
-     * @param \App\Dtos\UserDto $userDto
+     * @param UserDto $userDto
      * @param mixed $ipAddress
-     * @return array{data: array<string|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model>, message: string}
+     * @return array{data: array<string|Builder|Model>, message: string}
      */
     public function createUser(UserDto $userDto, $ipAddress): array
     {
@@ -32,6 +34,7 @@ class UserService implements UserServiceInterface
                 'password' => $userDto->getPassword(),
             ]);
 
+        /** @var User $user*/
         $token = $user->createToken('token')->plainTextToken;
         $otp = $this->generateOtp($user->email, $ipAddress);
 
@@ -40,7 +43,7 @@ class UserService implements UserServiceInterface
         $data['user'] = $user;
         $data['token'] = $token;
 
-        $message = 'User Registeration Successfull!';
+        $message = 'User Registration Successfully!';
 
         return ['data' => $data, 'message' => $message];
     }
@@ -73,27 +76,22 @@ class UserService implements UserServiceInterface
 
         return ['data' => $data, 'message' => $message, 'code' => $code];
     }
-    /**
-     * @inheritDoc
-     */
     public function getUserById(int $userId): User
     {
+        /** @var User $user */
         $user = User::query()
             ->where('id', $userId)
             ->first();
         return $user;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function hasSetPin(User $user): bool
     {
         return $user->pin != null;
     }
 
     /**
-     * @inheritDoc
+     * @throws PinHasAlreadyBeenSet
      */
     public function setupPin(User $user, string $pin): void
     {
@@ -106,19 +104,20 @@ class UserService implements UserServiceInterface
     }
 
     /**
-     * @inheritDoc
+     * @throws InvalidPinException
+     * @throws NotSetupPin
      */
     public function validatePin(int $userId, string $pin): bool
     {
         $user = $this->getUserById($userId);
-        if (!$user) {
+        if (!$this->getUserById($userId)) {
             throw new ModelNotFoundException();
         }
         if (!$this->hasSetPin($user)) {
             throw new NotSetupPin();
         }
         if (!Hash::check($pin, $user->pin)) {
-            throw new InvaildPinException();
+            throw new InvalidPinException();
         }
         return true;
     }

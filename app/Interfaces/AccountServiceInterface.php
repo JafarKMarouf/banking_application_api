@@ -19,13 +19,11 @@ interface AccountServiceInterface
 
     public function getAccountByUserId(int $userId): Account;
 
-    public function getAccount(int|string $accountNumberOrUserId): Account;
-
     public function hasAccountNumber(UserDto $userDto): bool;
 
     public function accountExist(Builder $accountQuery): void;
 
-    public function vaildAccountNumber(string $account_number): void;
+    public function validAccountNumber(string $account_number): void;
 
     public function deposit(DepositDto $depositDto): void;
 

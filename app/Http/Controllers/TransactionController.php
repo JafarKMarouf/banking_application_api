@@ -5,13 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Requests\FilterTransactionRequest;
 use App\Http\Response\Response;
 use App\Services\TransactionService;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class TransactionController extends Controller
 {
     public function __construct(private readonly TransactionService $transactionService) {}
 
-    public function index(FilterTransactionRequest $request)
+    public function index(FilterTransactionRequest $request): JsonResponse
     {
         $user = $request->user();
         $transactionBuilder = $this->transactionService
@@ -40,11 +40,11 @@ class TransactionController extends Controller
             $user->id,
             $transactionBuilder
         );
-        return Response::success(
+        return Response::sendSuccess(
             [
                 'transaction' => $transactionBuilder->paginate()
             ],
-            'Transaction History retreived'
+            'Transaction History retrieved'
         );
     }
 }

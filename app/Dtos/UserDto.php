@@ -15,172 +15,106 @@ class UserDto implements DtoInterface
     private string $email;
     private string $phone_number;
     private string $password;
-    private string $pin;
     private Carbon $created_at;
     private Carbon $updated_at;
 
     /**
-     * Get the value of id
+     * @return int|null
      */
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
 
     /**
-     * Set the value of id
-     *
-     * @return  self
+     * @param int|null $id
      */
-    public function setId($id)
+    public function setId(?int $id): void
     {
         $this->id = $id;
-
-        return $this;
     }
 
     /**
-     * Get the value of name
+     * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
-     * Set the value of name
-     *
-     * @return  self
+     * @param string $name
      */
-    public function setName($name)
+    public function setName(string $name): void
     {
         $this->name = $name;
-
-        return $this;
     }
 
     /**
-     * Get the value of email
+     * @return string
      */
-    public function getEmail()
+    public function getEmail(): string
     {
         return $this->email;
     }
 
     /**
-     * Set the value of email
-     *
-     * @return  self
+     * @param string $email
      */
-    public function setEmail($email)
+    public function setEmail(string $email): void
     {
         $this->email = $email;
-
-        return $this;
     }
 
     /**
-     * Get the value of password
+     * @return string
      */
-    public function getPassword()
-    {
-        return $this->password;
-    }
-
-    /**
-     * Set the value of password
-     *
-     * @return  self
-     */
-    public function setPassword($password)
-    {
-        $this->password = $password;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of phone_number
-     */
-    public function getPhoneNumber()
+    public function getPhoneNumber(): string
     {
         return $this->phone_number;
     }
 
     /**
-     * Set the value of phone_number
-     *
-     * @return  self
+     * @param string $phone_number
      */
-    public function setPhoneNumber($phone_number)
+    public function setPhoneNumber(string $phone_number): void
     {
         $this->phone_number = $phone_number;
-
-        return $this;
     }
 
     /**
-     * Get the value of pin
+     * @return string
      */
-    public function getPin()
+    public function getPassword(): string
     {
-        return $this->pin;
+        return $this->password;
     }
 
     /**
-     * Set the value of pin
-     *
-     * @return  self
+     * @param string $password
      */
-    public function setPin($pin)
+    public function setPassword(string $password): void
     {
-        $this->pin = $pin;
-
-        return $this;
+        $this->password = $password;
     }
 
     /**
-     * Get the value of created_at
+     * @param Carbon $created_at
      */
-    public function getCreatedAt()
-    {
-        return $this->created_at;
-    }
-
-    /**
-     * Set the value of created_at
-     *
-     * @return  self
-     */
-    public function setCreatedAt($created_at)
+    public function setCreatedAt(Carbon $created_at): void
     {
         $this->created_at = $created_at;
-
-        return $this;
     }
 
     /**
-     * Get the value of updated_at
+     * @param Carbon $updated_at
      */
-    public function getUpdatedAt()
-    {
-        return $this->updated_at;
-    }
-
-    /**
-     * Set the value of updated_at
-     *
-     * @return  self
-     */
-    public function setUpdatedAt($updated_at)
+    public function setUpdatedAt(Carbon $updated_at): void
     {
         $this->updated_at = $updated_at;
-
-        return $this;
     }
-    /**
-     * @inheritDoc
-     */
+
+
     public static function fromApiFormRequest(FormRequest $request): DtoInterface
     {
 
@@ -193,9 +127,6 @@ class UserDto implements DtoInterface
         return $userDto;
     }
 
-    /**
-     * @inheritDoc
-     */
     public static function fromModel(User|Model $model): DtoInterface
     {
         $userDto = new UserDto();
@@ -209,9 +140,7 @@ class UserDto implements DtoInterface
         return $userDto;
     }
 
-    /**
-     * @inheritDoc
-     */
+
     public static function toArray(Model $model): array
     {
         return [
@@ -223,4 +152,6 @@ class UserDto implements DtoInterface
             'updated_at' => $model->updated_at,
         ];
     }
+
+
 }

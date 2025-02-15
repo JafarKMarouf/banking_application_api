@@ -2,18 +2,28 @@
 
 namespace App\Traits;
 
+use Exception;
 use Ichtrojan\Otp\Otp;
 use Illuminate\Support\Facades\Cache;
 
 trait OtpTrait
 {
 
+    /**
+     * @param $email
+     * @param $ipAddress
+     * @param string $type
+     * @param int $length
+     * @param int $validity
+     * @return mixed
+     * @throws Exception
+     */
     public function generateOtp(
         $email,
         $ipAddress,
-        $type = 'alpha_numeric',
-        $length = 6,
-        $validity = 2,
+        string $type = 'alpha_numeric',
+        int $length = 6,
+        int $validity = 2,
     ): mixed {
         $otp = new Otp;
         $otp = $otp->generate(

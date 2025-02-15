@@ -9,8 +9,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Transfer extends Model
 {
     use HasFactory;
-    protected $guarded  = [];
 
+    public mixed $id;
+    protected $fillable = [
+        'id',
+        'sender_id',
+        'sender_account_id',
+        'recipient_id',
+        'recipient_account_id',
+        'reference',
+        'amount',
+        'status'
+    ];
 
     public function sender(): BelongsTo
     {

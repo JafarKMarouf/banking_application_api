@@ -2,6 +2,8 @@
 
 namespace App\Traits;
 
+use Error;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 
@@ -22,7 +24,7 @@ trait ApiResponseTrait
 
         if (
             isset($data['exception']) &&
-            ($data['exception'] instanceof \Error || $data['exception'] instanceof \Exception)
+            ($data['exception'] instanceof Error || $data['exception'] instanceof Exception)
         ) {
             if (config('app.env') !== 'production') {
                 $responseStructure['exception'] = [
@@ -70,7 +72,7 @@ trait ApiResponseTrait
     public function sendError(
         string $message = '',
         int $status_code = 400,
-        \Exception $exception = null,
+        Exception $exception = null,
         int $error_code = 1
     ): JsonResponse {
         return $this->apiResponse(

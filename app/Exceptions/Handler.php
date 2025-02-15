@@ -3,6 +3,8 @@
 namespace App\Exceptions;
 
 use App\Http\Response\Response;
+use Error;
+use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -22,7 +24,7 @@ class Handler extends ExceptionHandler
     /**
      * A list of exception types with their corresponding custom log levels.
      *
-     * @var array<class-string<\Throwable>, \Psr\Log\LogLevel::*>
+     * @var array<class-string<Throwable>, \Psr\Log\LogLevel::*>
      */
     protected $levels = [
         //
@@ -31,7 +33,7 @@ class Handler extends ExceptionHandler
     /**
      * A list of the exception types that are not reported.
      *
-     * @var array<int, class-string<\Throwable>>
+     * @var array<int, class-string<Throwable>>
      */
     protected $dontReport = [
         //
@@ -60,8 +62,9 @@ class Handler extends ExceptionHandler
 
     /**
      * @param mixed $request
-     * @param \Throwable $e
-     * @return \Illuminate\Http\JsonResponse|\App\Http\Response\Response
+     * @param Throwable $e
+     * @return JsonResponse|Response
+     * @throws Throwable
      */
     public function render($request, Throwable $e): JsonResponse|Response
     {
@@ -69,13 +72,13 @@ class Handler extends ExceptionHandler
 
         if ($e instanceof MethodNotAllowedHttpException) {
             $status_code = HttpFoundationResponse::HTTP_METHOD_NOT_ALLOWED;
-            return Response::error($e->getMessage(), $status_code);
+            return Response::sendError($e->getMessage(), $status_code);
         }
 
 
         if ($e instanceof NotFoundHttpException) {
             $status_code = HttpFoundationResponse::HTTP_NOT_FOUND;
-            return Response::error($e->getMessage(), $status_code);
+            return Response::sendError($e->getMessage(), $status_code);
         }
 
         if ($request->expectsJson()) {
@@ -83,7 +86,7 @@ class Handler extends ExceptionHandler
             if ($e instanceof ValidationException) {
                 $status_code =
                     HttpFoundationResponse::HTTP_UNPROCESSABLE_ENTITY;
-                return Response::validation(
+                return Response::sendValidationError(
                     $e->errors(),
                     $status_code
                 );
@@ -91,15 +94,15 @@ class Handler extends ExceptionHandler
             if ($e instanceof ModelNotFoundException) {
                 $status_code =
                     HttpFoundationResponse::HTTP_NOT_FOUND;
-                return Response::error(
-                    'Recource could not be found',
+                return Response::sendError(
+                    'Recourse could not be found',
                     $status_code,
                 );
             }
             if ($e instanceof UniqueConstraintViolationException) {
                 $status_code =
                     HttpFoundationResponse::HTTP_INTERNAL_SERVER_ERROR;
-                return Response::error(
+                return Response::sendError(
                     'Duplicate entry found',
                     $status_code
                 );
@@ -107,54 +110,54 @@ class Handler extends ExceptionHandler
             if ($e instanceof QueryException) {
                 $status_code =
                     HttpFoundationResponse::HTTP_INTERNAL_SERVER_ERROR;
-                return Response::error(
+                return Response::sendError(
                     'Could not execute query',
                     $status_code
                 );
             }
             if ($e instanceof AuthenticationException) {
                 $status_code =  HttpFoundationResponse::HTTP_UNAUTHORIZED;
-                return Response::error(
+                return Response::sendError(
                     'Unauthenticated or Token Expired, please try to login again',
                     $status_code
                 );
             }
             if ($e instanceof PinHasAlreadyBeenSet) {
                 $status_code = HttpFoundationResponse::HTTP_BAD_REQUEST;
-                return Response::error('Pin has already been set', $status_code);
+                return Response::sendError('Pin has already been set', $status_code);
             }
             if ($e instanceof NotSetupPin) {
                 $status_code = HttpFoundationResponse::HTTP_UNAUTHORIZED;
-                return Response::error(
+                return Response::sendError(
                     'You have not set PIN yet!, Please setup your PIN',
                     $status_code
                 );
             }
             if ($e instanceof AccountNumberExistsException) {
                 $status_code = HttpFoundationResponse::HTTP_BAD_REQUEST;
-                return Response::error(
+                return Response::sendError(
                     'Account number has already been generated!',
                     $status_code
                 );
             }
-            if ($e instanceof InvaildAccountNumberException) {
+            if ($e instanceof InvalidAccountNumberException) {
                 $status_code = HttpFoundationResponse::HTTP_NOT_FOUND;
-                return Response::error(
-                    'Invaild your account number',
+                return Response::sendError(
+                    'Invalid your account number',
                     $status_code
                 );
             }
-            if ($e instanceof InvaildPinException) {
+            if ($e instanceof InvalidPinException) {
                 $status_code = HttpFoundationResponse::HTTP_BAD_REQUEST;
-                return Response::error(
-                    'invaild pin!',
+                return Response::sendError(
+                    'invalid pin!',
                     $status_code
                 );
             }
 
             if ($e instanceof NotEnoughBalanceException) {
                 $status_code = HttpFoundationResponse::HTTP_FORBIDDEN;
-                return Response::error(
+                return Response::sendError(
                     "your balance don't enough!",
                     $status_code
                 );
@@ -162,22 +165,22 @@ class Handler extends ExceptionHandler
 
             if ($e instanceof AuthorizationException) {
                 $status_code = HttpFoundationResponse::HTTP_UNAUTHORIZED;
-                return Response::error($e->getMessage(), $status_code);
+                return Response::sendError($e->getMessage(), $status_code);
             }
-            if ($e instanceof \Exception) {
+            if ($e instanceof Exception) {
                 $status_code =
                     HttpFoundationResponse::HTTP_INTERNAL_SERVER_ERROR;
 
-                return Response::error(
+                return Response::sendError(
                     $e->getMessage(),
                     $status_code,
                 );
             }
-            if ($e instanceof \Error) {
+            if ($e instanceof Error) {
                 $status_code =
                     HttpFoundationResponse::HTTP_INTERNAL_SERVER_ERROR;
 
-                return Response::error(
+                return Response::sendError(
                     $e->getMessage(),
                     $status_code,
                 );

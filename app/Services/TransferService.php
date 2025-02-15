@@ -6,22 +6,16 @@ use App\Dtos\TransferDto;
 use App\Interfaces\TransferServiceInterface;
 use App\Models\Transfer;
 use Illuminate\Database\Eloquent\Builder;
-use \Illuminate\Support\Str;
-use \Carbon\Carbon;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class TransferService implements TransferServiceInterface
 {
-
-    /**
-     * @inheritDoc
-     */
     public function modelQuery(): Builder
     {
         return Transfer::query();
     }
-    /**
-     * @inheritDoc
-     */
+
     public function generateReference(): string
     {
         return Str::upper(
@@ -32,6 +26,9 @@ class TransferService implements TransferServiceInterface
     public function createTransfer(TransferDto $transferDto): Transfer
     {
         $data =  $transferDto->toArray($transferDto);
-        return $this->modelQuery()->create($data);
+
+        /** @var Transfer $transfer*/
+        $transfer = $this->modelQuery()->create($data);
+        return $transfer;
     }
 }

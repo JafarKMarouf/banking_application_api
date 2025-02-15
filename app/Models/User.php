@@ -45,13 +45,8 @@ class User extends Authenticatable
         return $this->hasOne(Account::class);
     }
 
-    public function transfers(): HasMany
-    {
-        return $this->hasMany(Transfer::class);
-    }
-
     public function transactions(): HasMany
     {
-        return $this->hasMany(Transcation::class);
+        return $this->hasMany(Transaction::class);
     }
 }

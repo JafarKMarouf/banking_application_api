@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notification;
 class SendWelcomeNotification extends Notification
 {
     use Queueable;
-    private $username;
+    private string $username;
     /**
      * Create a new notification instance.
      */
@@ -23,7 +23,7 @@ class SendWelcomeNotification extends Notification
      *
      * @return array<int, string>
      */
-    public function via(object $notifiable): array
+    public function via(): array
     {
         return ['mail'];
     }
@@ -45,7 +45,7 @@ class SendWelcomeNotification extends Notification
      *
      * @return array<string, mixed>
      */
-    public function toArray(object $notifiable): array
+    public function toArray(): array
     {
         return [
             //

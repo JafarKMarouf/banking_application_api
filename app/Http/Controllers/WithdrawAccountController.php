@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Dtos\WithdrawDto;
+use App\Exceptions\AmountToLowException;
+use App\Exceptions\InvalidAccountNumberException;
+use App\Exceptions\InvalidPinException;
+use App\Exceptions\NotEnoughBalanceException;
+use App\Exceptions\NotSetupPin;
 use App\Http\Requests\StoreWithdrawRequest;
 use App\Http\Response\Response;
 use App\Services\AccountService;
@@ -12,6 +17,13 @@ class WithdrawAccountController extends Controller
 {
     public function __construct(private readonly AccountService $accountService) {}
 
+    /**
+     * @throws NotSetupPin
+     * @throws AmountToLowException
+     * @throws InvalidPinException
+     * @throws InvalidAccountNumberException
+     * @throws NotEnoughBalanceException
+     */
     public function store(StoreWithdrawRequest $withdrawRequest): JsonResponse
     {
         $withdrawRequest->validated();
@@ -26,6 +38,6 @@ class WithdrawAccountController extends Controller
 
         $this->accountService->withdraw($withdrawDto);
 
-        return Response::success([], 'Withdraw Successfully');
+        return Response::sendSuccess([], 'Withdraw Successfully');
     }
 }

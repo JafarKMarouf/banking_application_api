@@ -10,22 +10,17 @@ use App\Interfaces\TransactionServiceInterface;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use \Illuminate\Support\Str;
-use App\Models\Transcation;
+use Illuminate\Support\Str;
+use App\Models\Transaction;
 
 class TransactionService implements TransactionServiceInterface
 {
-    /**
-     * @inheritDoc
-     */
+
     public function modelQuery(): Builder
     {
-        return Transcation::query();
+        return Transaction::query();
     }
-    /**
-     * @inheritDoc
-     */
-    public function createTransaction(TransactionDto $transactionDto): Transcation
+    public function createTransaction(TransactionDto $transactionDto): Transaction
     {
         $data = [];
         if ($transactionDto->getCategory() == TransactionCategoryEnum::DEPOSIT->value) {
@@ -34,13 +29,13 @@ class TransactionService implements TransactionServiceInterface
         if ($transactionDto->getCategory() == TransactionCategoryEnum::WITHDRAW->value) {
             $data = $transactionDto->forWithdrawToArray($transactionDto);
         }
+
+        /** @var Transaction $transaction */
         $transaction = $this->modelQuery()->create($data);
+
         return $transaction;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function generateReference(): string
     {
         return Str::upper(
@@ -49,23 +44,25 @@ class TransactionService implements TransactionServiceInterface
     }
 
     /**
-     * @inheritDoc
+     * @throws ANotFoundException
      */
-    public function getTransactionById(int $id): Transcation
+    public function getTransactionById(int $id): Transaction
     {
         $transaction = $this->modelQuery()->where('id', $id)->first();
 
         if (!$transaction) {
             throw new ANotFoundException('transaction with the supplied reference does not exist');
         }
+        /** @var Transaction $transaction */
         return $transaction;
     }
 
     /**
-     * @inheritDoc
+     * @throws ANotFoundException
      */
-    public function getTransactionByReference(string $reference): Transcation
+    public function getTransactionByReference(string $reference): Transaction
     {
+        /** @var Transaction $transaction*/
         $transaction = $this->modelQuery()
             ->where('reference', $reference)->first();
         if (!$transaction) {
@@ -73,9 +70,7 @@ class TransactionService implements TransactionServiceInterface
         }
         return $transaction;
     }
-    /**
-     * @inheritDoc
-     */
+
     public function downloadTransactionHistory(
         AccountDto $accountDto,
         Carbon $fromDate,
@@ -100,9 +95,6 @@ class TransactionService implements TransactionServiceInterface
                 'transfer_id' => $transferId,
             ]);
     }
-    /**
-     * @inheritDoc
-     */
     public function getTransactionByAccountNumber(string $accountNumber, Builder $builder): Builder
     {
         return $builder->whereHas('account', function ($query) use ($accountNumber): void {
@@ -110,9 +102,6 @@ class TransactionService implements TransactionServiceInterface
         });
     }
 
-    /**
-     * @inheritDoc
-     */
     public function getTransactionByUserId(int $userId, Builder $builder): Builder
     {
         return $builder->where('user_id', $userId);

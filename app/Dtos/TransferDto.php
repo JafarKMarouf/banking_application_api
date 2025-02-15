@@ -215,7 +215,7 @@ class TransferDto
             'recipient_id' => $transferDto->getRecipientId(),
             'recipient_account_id' => $transferDto->getRecipientAccountId(),
             'amount' => $transferDto->getAmount(),
-            'status' => 'Pendding',
+            'status' => 'Pending',
         ];
     }
 }
