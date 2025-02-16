@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transcations', function (Blueprint $table) {
+        Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->string('reference')
-                ->index('transcation_reference_index');
+                ->index('transaction_reference_index');
             $table->foreignId('user_id')
                 ->nullable()
                 ->constrained('users')
@@ -44,6 +44,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transcations');
+        Schema::dropIfExists('transactions');
     }
 };

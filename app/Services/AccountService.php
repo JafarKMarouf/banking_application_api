@@ -17,6 +17,7 @@ use App\Exceptions\NotEnoughBalanceException;
 use App\Exceptions\NotSetupPin;
 use App\Interfaces\AccountServiceInterface;
 use App\Models\Account;
+use App\Models\Transfer;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -315,7 +316,6 @@ class AccountService implements AccountServiceInterface
             );
 
             $transferDto = new TransferDto();
-            $transferDto->setReference($this->transferService->generateReference());
 
             $transferDto->setSenderAccountId($senderAccountDto->getId());
             $transferDto->setSenderId($senderAccountDto->getUserId());
@@ -323,12 +323,12 @@ class AccountService implements AccountServiceInterface
             $transferDto->setRecipientAccountId($recipientAccountDto->getId());
             $transferDto->setRecipientId($recipientAccountDto->getUserId());
 
+            $transferDto->setReference($this->transferService->generateReference());
             $transferDto->setAmount($amount);
 
             $transfer = $this->transferService->createTransfer($transferDto);
-
-            $transactionDepositDto->setTransferId($transfer->id);
-            $transactionWithdrawDto->setTransferId($transfer->id);
+            $transactionDepositDto->setTransferId($transfer['id']);
+            $transactionWithdrawDto->setTransferId($transfer['id']);
 
             /** @var Account $lockedSenderAccount */
             event(new TransactionEvent(

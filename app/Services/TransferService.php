@@ -26,7 +26,6 @@ class TransferService implements TransferServiceInterface
     public function createTransfer(TransferDto $transferDto): Transfer
     {
         $data =  $transferDto->toArray($transferDto);
-
         /** @var Transfer $transfer*/
         $transfer = $this->modelQuery()->create($data);
         return $transfer;
