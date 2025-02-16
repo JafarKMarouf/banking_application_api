@@ -32,6 +32,11 @@ class AccountService implements AccountServiceInterface
         private readonly TransferService $transferService,
     ) {}
 
+    public function modelQuery(): Builder
+    {
+        return Account::query();
+    }
+
     /**
      *
      * @throws AccountNumberExistsException
@@ -70,27 +75,31 @@ class AccountService implements AccountServiceInterface
         return $account;
     }
 
+    /**
+     * @throws InvalidAccountNumberException
+     */
     public function getAccountByUserId(int $userId): Account
     {
+        $accountExist = $this->modelQuery()
+            ->where('user_id', $userId)
+            ->exists();
+        if(!$accountExist){
+            throw new InvalidAccountNumberException();
+        }
         /** @var Account $account */
         $account = $this->modelQuery()
             ->where('user_id', $userId)
             ->first();
-
         return $account;
     }
 
-
-    public function modelQuery(): Builder
-    {
-        return Account::query();
-    }
     public function hasAccountNumber(UserDto $userDto): bool
     {
         return $this->modelQuery()
             ->where('user_id', $userDto->getId())
             ->exists();
     }
+
     /**
      * @param Builder $accountQuery
      * @return void
@@ -121,14 +130,12 @@ class AccountService implements AccountServiceInterface
     public function validAccountNumber(string $account_number): void
     {
         $user_id = auth()->id();
-        $account = $this->getAccountByUserId(userId:$user_id);
-        if (!empty($account->account_number)) {
-            if ($account->account_number != $account_number) {
-                throw new InvalidAccountNumberException();
-            }
+        $account = $this->getAccountByUserId($user_id);
+
+        if ($account->account_number != $account_number) {
+            throw new InvalidAccountNumberException();
         }
     }
-
 
     /**
      * @throws InvalidAccountNumberException
@@ -151,6 +158,7 @@ class AccountService implements AccountServiceInterface
             );
 
             $this->accountExist($accountQuery);
+
             $this->validAccountNumber($depositDto->getAccount_number());
 
             $user_id = auth()->id();
