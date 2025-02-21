@@ -3,12 +3,14 @@
 namespace App\Services;
 
 use App\Dtos\UserDto;
+use App\Events\RegisterUserEvent;
 use App\Exceptions\InvalidPinException;
 use App\Exceptions\NotSetupPin;
 use App\Exceptions\PinHasAlreadyBeenSet;
 use App\Interfaces\UserServiceInterface;
 use App\Jobs\SendEmailVerificationJob;
 use App\Models\User;
+use App\Notifications\SendEmailVerificationNotification;
 use App\Traits\OtpTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -19,10 +21,12 @@ use Illuminate\Support\Facades\Hash;
 class UserService implements UserServiceInterface
 {
     use OtpTrait;
+
     /**
      * @param UserDto $userDto
      * @param mixed $ipAddress
      * @return array{data: array<string|Builder|Model>, message: string}
+     * @throws \Exception
      */
     public function createUser(UserDto $userDto, $ipAddress): array
     {
@@ -37,7 +41,6 @@ class UserService implements UserServiceInterface
         /** @var User $user*/
         $token = $user->createToken('token')->plainTextToken;
         $otp = $this->generateOtp($user->email, $ipAddress);
-
         dispatch(new SendEmailVerificationJob($user, $otp));
 
         $data['user'] = $user;
